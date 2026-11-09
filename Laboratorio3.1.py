@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# # Optional Lab: Classification
+# # Laboratorio opcional: Clasificación
 # 
-# In this lab, you will contrast regression and classification.
+# En este laboratorio vas a contrastar la regresión con la clasificación.
 
 # In[1]:
 
@@ -16,10 +16,10 @@ from plt_one_addpt_onclick import plt_one_addpt_onclick
 #plt.style.use('./deeplearning.mplstyle')
 
 
-# ## Classification Problems
-# <img align="left" src="./images/C1_W3_Classification.png"     style=" width:380px; padding: 10px; " > Examples of classification problems are things like: identifying email as Spam or Not Spam or determining if a tumor is malignant or benign. In particular, these are examples of *binary* classification where there are two possible outcomes.  Outcomes can be  described in pairs of 'positive'/'negative' such as 'yes'/'no, 'true'/'false' or '1'/'0'. 
+# ## Problemas de clasificación
+# <img align="left" src="./images/C1_W3_Classification.png"     style=" width:380px; padding: 10px; " > Algunos ejemplos de problemas de clasificación son: identificar si un correo es spam o no, o determinar si un tumor es maligno o benigno. En particular, estos son ejemplos de clasificación *binaria*, donde hay dos resultados posibles. Los resultados se pueden describir en pares "positivo"/"negativo", como "sí"/"no", "verdadero"/"falso" o "1"/"0". 
 # 
-# Plots of classification data sets often use symbols to indicate the outcome of an example. In the plots below, 'X' is used to represent the positive values while 'O' represents negative outcomes. 
+# Las gráficas de conjuntos de datos de clasificación suelen usar símbolos para indicar el resultado de cada ejemplo. En las gráficas de abajo, la "X" representa los resultados positivos y la "O", los negativos. 
 
 # In[2]:
 
@@ -37,7 +37,7 @@ pos = y_train == 1
 neg = y_train == 0
 
 fig,ax = plt.subplots(1,2,figsize=(8,3))
-#plot 1, single variable
+#gráfica 1, una variable
 ax[0].scatter(x_train[pos], y_train[pos], marker='x', s=80, c = 'red', label="y=1")
 ax[0].scatter(x_train[neg], y_train[neg], marker='o', s=100, label="y=0", facecolors='none', 
               edgecolors=dlc["dlblue"],lw=3)
@@ -45,36 +45,36 @@ ax[0].scatter(x_train[neg], y_train[neg], marker='o', s=100, label="y=0", faceco
 ax[0].set_ylim(-0.08,1.1)
 ax[0].set_ylabel('y', fontsize=12)
 ax[0].set_xlabel('x', fontsize=12)
-ax[0].set_title('one variable plot')
+ax[0].set_title('gráfica con una variable')
 ax[0].legend()
 
-#plot 2, two variables
+#gráfica 2, dos variables
 plot_data(X_train2, y_train2, ax[1])
 ax[1].axis([0, 4, 0, 4])
 ax[1].set_ylabel('$x_1$', fontsize=12)
 ax[1].set_xlabel('$x_0$', fontsize=12)
-ax[1].set_title('two variable plot')
+ax[1].set_title('gráfica con dos variables')
 ax[1].legend()
 plt.tight_layout()
 plt.show()
 
 
-# Note in the plots above:
-# - In the single variable plot, positive results are shown both a red 'X's and as y=1. Negative results are blue 'O's and are located at y=0.
-#    - Recall in the case of linear regression, y would not have been limited to two values but could have been any value.
-# - In the two-variable plot, the y axis is not available.  Positive results are shown as red 'X's, while negative results use the blue 'O' symbol.
-#     - Recall in the case of linear regression with multiple variables, y would not have been limited to two values and a similar plot would have been three-dimensional.
+# Observa en las gráficas:
+# - En la gráfica de una variable, los resultados positivos se muestran como "X" rojas y en y=1. Los negativos son "O" azules y están en y=0.
+#    - Recuerda que, en regresión lineal, y no estaba limitada a dos valores, sino que podía tomar cualquier valor.
+# - En la gráfica de dos variables no hay eje para y. Los resultados positivos se muestran como "X" rojas y los negativos con el símbolo "O" azul.
+#     - Recuerda que, en regresión lineal con múltiples variables, y no estaba limitada a dos valores, y una gráfica similar habría sido tridimensional.
 
-# ## Linear Regression approach
-# In the previous week, you applied linear regression to build a prediction model. Let's try that approach here using the simple example that was described in the lecture. The model will predict if a tumor is benign or malignant based on tumor size.  Try the following:
-# - Click on 'Run Linear Regression' to find the best linear regression model for the given data.
-#     - Note the resulting linear model does **not** match the data well. 
-# One option to improve the results is to apply a *threshold*. 
-# - Tick the box on the 'Toggle 0.5 threshold' to show the predictions if a threshold is applied.
-#     - These predictions look good, the predictions match the data
-# - *Important*: Now, add further 'malignant' data points on the far right, in the large tumor size range (near 10), and re-run linear regression.
-#     - Now, the model predicts the larger tumor, but data point at x=3 is being incorrectly predicted!
-# - to clear/renew the plot, rerun the cell containing the plot command.
+# ## Enfoque con regresión lineal
+# La semana pasada aplicaste regresión lineal para construir un modelo de predicción. Probemos ese enfoque aquí con el ejemplo sencillo que se describió en clase. El modelo predecirá si un tumor es benigno o maligno según su tamaño. Prueba lo siguiente:
+# - Haz clic en "Run Linear Regression" (ejecutar regresión lineal) para encontrar el mejor modelo de regresión lineal para los datos.
+#     - Observa que el modelo lineal resultante **no** se ajusta bien a los datos. 
+# Una forma de mejorar los resultados es aplicar un *umbral*. 
+# - Marca la casilla "Toggle 0.5 threshold" (activar umbral de 0.5) para ver las predicciones al aplicar el umbral.
+#     - Estas predicciones se ven bien: coinciden con los datos.
+# - *Importante*: ahora agrega más puntos "malignos" en el extremo derecho, en el rango de tumores grandes (cerca de 10), y vuelve a ejecutar la regresión lineal.
+#     - Ahora el modelo predice bien el tumor más grande, ¡pero el punto en x=3 se predice de forma incorrecta!
+# - Para limpiar o reiniciar la gráfica, vuelve a ejecutar la celda que contiene el comando de la gráfica.
 
 # In[5]:
 
@@ -85,21 +85,17 @@ plt.close('all')
 addpt = plt_one_addpt_onclick( x_train,y_train, w_in, b_in, logistic=False)
 
 
-# The example above demonstrates that the linear model is insufficient to model categorical data. The model can be extended as described in the following lab.
+# El ejemplo anterior muestra que el modelo lineal no es suficiente para modelar datos categóricos. El modelo se puede ampliar, como se describe en el siguiente laboratorio.
 
-# ## Congratulations!
-# In this lab you:
-# - explored categorical data sets and plotting
-# - determined that linear regression was insufficient for a classification problem.
-
-# In[ ]:
-
-
-
-
+# ## ¡Felicidades!
+# En este laboratorio:
+# - Exploraste conjuntos de datos categóricos y cómo graficarlos.
+# - Comprobaste que la regresión lineal no es suficiente para un problema de clasificación.
 
 # In[ ]:
 
 
 
 
+
+# In[ ]:
