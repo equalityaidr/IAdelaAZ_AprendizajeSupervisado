@@ -1,18 +1,18 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# # Optional Lab: Feature Engineering and Polynomial Regression
+# # Laboratorio opcional: Ingeniería de variables y regresión polinomial
 # 
 # ![](./images/C1_W2_Lab07_FeatureEngLecture.PNG)
 # 
 
-# ## Goals
-# In this lab you will:
-# - explore feature engineering and polynomial regression which allows you to use the machinery of linear regression to fit very complicated, even very non-linear functions.
+# ## Objetivos
+# En este laboratorio vas a:
+# - Explorar la ingeniería de variables (feature engineering) y la regresión polinomial, que te permiten usar las herramientas de la regresión lineal para ajustar funciones muy complicadas, incluso muy no lineales.
 # 
 
-# ## Tools
-# You will utilize the function developed in previous labs as well as matplotlib and NumPy. 
+# ## Herramientas
+# Usarás las funciones desarrolladas en laboratorios anteriores, además de Matplotlib y NumPy. 
 
 # In[ ]:
 
@@ -20,79 +20,79 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from lab_utils_multi import zscore_normalize_features, run_gradient_descent_feng
-np.set_printoptions(precision=2)  # reduced display precision on numpy arrays
+np.set_printoptions(precision=2)  # reduce la precisión con que se muestran los arrays de numpy
 
 
 # <a name='FeatureEng'></a>
-# # Feature Engineering and Polynomial Regression Overview
+# # Panorama de la ingeniería de variables y la regresión polinomial
 # 
-# Out of the box, linear regression provides a means of building models of the form:
+# Tal cual, la regresión lineal permite construir modelos de la forma:
 # $$f_{\mathbf{w},b} = w_0x_0 + w_1x_1+ ... + w_{n-1}x_{n-1} + b \tag{1}$$ 
-# What if your features/data are non-linear or are combinations of features? For example,  Housing prices do not tend to be linear with living area but penalize very small or very large houses resulting in the curves shown in the graphic above. How can we use the machinery of linear regression to fit this curve? Recall, the 'machinery' we have is the ability to modify the parameters $\mathbf{w}$, $\mathbf{b}$ in (1) to 'fit' the equation to the training data. However, no amount of adjusting of $\mathbf{w}$,$\mathbf{b}$ in (1) will achieve a fit to a non-linear curve.
+# ¿Qué pasa si tus variables o datos no son lineales, o son combinaciones de variables? Por ejemplo, el precio de las viviendas no suele ser lineal con respecto al área habitable, sino que penaliza las casas muy pequeñas o muy grandes, lo que produce curvas como las de la imagen de arriba. ¿Cómo podemos usar las herramientas de la regresión lineal para ajustar esa curva? Recuerda que la "herramienta" que tenemos es la capacidad de modificar los parámetros $\mathbf{w}$, $\mathbf{b}$ en (1) para "ajustar" la ecuación a los datos de entrenamiento. Sin embargo, por más que ajustemos $\mathbf{w}$,$\mathbf{b}$ en (1), no lograremos ajustar una curva no lineal.
 # 
 
 # <a name='PolynomialFeatures'></a>
-# ## Polynomial Features
+# ## Variables polinomiales
 # 
-# Above we were considering a scenario where the data was non-linear. Let's try using what we know so far to fit a non-linear curve. We'll start with a simple quadratic: $y = 1+x^2$
+# Arriba consideramos un escenario donde los datos no eran lineales. Intentemos usar lo que sabemos hasta ahora para ajustar una curva no lineal. Empezaremos con una cuadrática simple: $y = 1+x^2$
 # 
-# You're familiar with all the routines we're using. They are available in the lab_utils.py file for review. We'll use [`np.c_[..]`](https://numpy.org/doc/stable/reference/generated/numpy.c_.html) which is a NumPy routine to concatenate along the column boundary.
+# Ya conoces todas las funciones que vamos a usar; están en el archivo lab_utils_multi.py, por si quieres revisarlas. Usaremos [`np.c_[..]`](https://numpy.org/doc/stable/reference/generated/numpy.c_.html), una función de NumPy que concatena arrays como columnas.
 
 # In[ ]:
 
 
-# create target data
+# crear los datos objetivo
 x = np.arange(0, 20, 1)
 y = 1 + x**2
 X = x.reshape(-1, 1)
 
 model_w,model_b = run_gradient_descent_feng(X,y,iterations=1000, alpha = 1e-2)
 
-plt.scatter(x, y, marker='x', c='r', label="Actual Value"); plt.title("no feature engineering")
-plt.plot(x,X@model_w + model_b, label="Predicted Value");  plt.xlabel("X"); plt.ylabel("y"); plt.legend(); plt.show()
+plt.scatter(x, y, marker='x', c='r', label="Valor real"); plt.title("sin ingeniería de variables")
+plt.plot(x,X@model_w + model_b, label="Valor predicho");  plt.xlabel("X"); plt.ylabel("y"); plt.legend(); plt.show()
 
 
-# Well, as expected, not a great fit. What is needed is something like $y= w_0x_0^2 + b$, or a **polynomial feature**.
-# To accomplish this, you can modify the *input data* to *engineer* the needed features. If you swap the original data with a version that squares the $x$ value, then you can achieve $y= w_0x_0^2 + b$. Let's try it. Swap `X` for `X**2` below:
+# Como era de esperar, el ajuste no es bueno. Lo que se necesita es algo como $y= w_0x_0^2 + b$, es decir, una **variable polinomial**.
+# Para lograrlo, puedes modificar los *datos de entrada* para *construir* las variables necesarias. Si reemplazas los datos originales por una versión con el valor de $x$ al cuadrado, puedes obtener $y= w_0x_0^2 + b$. Probémoslo: abajo se reemplaza `X` por `X**2`.
 
 # In[ ]:
 
 
-# create target data
+# crear los datos objetivo
 x = np.arange(0, 20, 1)
 y = 1 + x**2
 
-# Engineer features 
-X = x**2      #<-- added engineered feature
+# Construir variables 
+X = x**2      #<-- variable construida
 
 
 # In[ ]:
 
 
-X = X.reshape(-1, 1)  #X should be a 2-D Matrix
+X = X.reshape(-1, 1)  #X debe ser una matriz 2-D
 model_w,model_b = run_gradient_descent_feng(X, y, iterations=10000, alpha = 1e-5)
 
-plt.scatter(x, y, marker='x', c='r', label="Actual Value"); plt.title("Added x**2 feature")
-plt.plot(x, np.dot(X,model_w) + model_b, label="Predicted Value"); plt.xlabel("x"); plt.ylabel("y"); plt.legend(); plt.show()
+plt.scatter(x, y, marker='x', c='r', label="Valor real"); plt.title("Con la variable x**2")
+plt.plot(x, np.dot(X,model_w) + model_b, label="Valor predicho"); plt.xlabel("x"); plt.ylabel("y"); plt.legend(); plt.show()
 
 
-# Great! near perfect fit. Notice the values of $\mathbf{w}$ and b printed right above the graph: `w,b found by gradient descent: w: [1.], b: 0.0490`. Gradient descent modified our initial values of $\mathbf{w},b $ to be (1.0,0.049) or a model of $y=1*x_0^2+0.049$, very close to our target of $y=1*x_0^2+1$. If you ran it longer, it could be a better match. 
+# ¡Excelente! El ajuste es casi perfecto. Observa los valores de $\mathbf{w}$ y b que se imprimen justo encima de la gráfica: `w,b found by gradient descent: w: [1.], b: 0.0490`. El descenso de gradiente modificó los valores iniciales de $\mathbf{w},b$ hasta (1.0, 0.049), es decir, el modelo $y=1*x_0^2+0.049$, muy cercano a nuestro objetivo $y=1*x_0^2+1$. Si lo ejecutaras por más tiempo, el ajuste sería aún mejor. 
 
-# ### Selecting Features
+# ### Selección de variables
 # <a name='GDF'></a>
-# Above, we knew that an $x^2$ term was required. It may not always be obvious which features are required. One could add a variety of potential features to try and find the most useful. For example, what if we had instead tried : $y=w_0x_0 + w_1x_1^2 + w_2x_2^3+b$ ? 
+# Arriba sabíamos que se necesitaba un término $x^2$. No siempre es obvio qué variables se necesitan. Se pueden agregar varias variables candidatas para tratar de encontrar las más útiles. Por ejemplo, ¿qué pasaría si hubiéramos probado con $y=w_0x_0 + w_1x_1^2 + w_2x_2^3+b$? 
 # 
-# Run the next cells. 
+# Ejecuta las siguientes celdas. 
 
 # In[ ]:
 
 
-# create target data
+# crear los datos objetivo
 x = np.arange(0, 20, 1)
 y = x**2
 
-# engineer features .
-X = np.c_[x, x**2, x**3]   #<-- added engineered feature
+# construir variables
+X = np.c_[x, x**2, x**3]   #<-- variables construidas
 
 
 # In[ ]:
@@ -100,31 +100,31 @@ X = np.c_[x, x**2, x**3]   #<-- added engineered feature
 
 model_w,model_b = run_gradient_descent_feng(X, y, iterations=10000, alpha=1e-7)
 
-plt.scatter(x, y, marker='x', c='r', label="Actual Value"); plt.title("x, x**2, x**3 features")
-plt.plot(x, X@model_w + model_b, label="Predicted Value"); plt.xlabel("x"); plt.ylabel("y"); plt.legend(); plt.show()
+plt.scatter(x, y, marker='x', c='r', label="Valor real"); plt.title("Variables x, x**2, x**3")
+plt.plot(x, X@model_w + model_b, label="Valor predicho"); plt.xlabel("x"); plt.ylabel("y"); plt.legend(); plt.show()
 
 
-# Note the value of $\mathbf{w}$, `[0.08 0.54 0.03]` and b is `0.0106`.This implies the model after fitting/training is:
+# Observa que el valor de $\mathbf{w}$ es `[0.08 0.54 0.03]` y el de b es `0.0106`. Esto significa que, después del ajuste/entrenamiento, el modelo es:
 # $$ 0.08x + 0.54x^2 + 0.03x^3 + 0.0106 $$
-# Gradient descent has emphasized the data that is the best fit to the $x^2$ data by increasing the $w_1$ term relative to the others.  If you were to run for a very long time, it would continue to reduce the impact of the other terms. 
-# >Gradient descent is picking the 'correct' features for us by emphasizing its associated parameter
+# El descenso de gradiente le dio más peso a la variable que mejor se ajusta a los datos, $x^2$, aumentando el término $w_1$ en relación con los demás. Si lo ejecutaras durante mucho tiempo, seguiría reduciendo el efecto de los otros términos. 
+# >El descenso de gradiente está eligiendo las variables "correctas" por nosotros, al darle más peso a su parámetro asociado
 # 
-# Let's review this idea:
-# - less weight value implies less important/correct feature, and in extreme, when the weight becomes zero or very close to zero, the associated feature is not useful in fitting the model to the data.
-# - above, after fitting, the weight associated with the $x^2$ feature is much larger than the weights for $x$ or $x^3$ as it is the most useful in fitting the data. 
+# Repasemos esta idea:
+# - Un peso menor indica una variable menos importante o menos adecuada. En el extremo, cuando el peso es cero o muy cercano a cero, la variable asociada no ayuda a ajustar el modelo a los datos.
+# - Arriba, después del ajuste, el peso asociado a la variable $x^2$ es mucho mayor que los pesos de $x$ o $x^3$, porque es la más útil para ajustar los datos. 
 
-# ### An Alternate View
-# Above, polynomial features were chosen based on how well they matched the target data. Another way to think about this is to note that we are still using linear regression once we have created new features. Given that, the best features will be linear relative to the target. This is best understood with an example. 
+# ### Otra forma de verlo
+# Arriba, las variables polinomiales se eligieron según qué tan bien coincidían con los datos objetivo. Otra forma de pensarlo es notar que, una vez creadas las nuevas variables, seguimos usando regresión lineal. Por lo tanto, las mejores variables serán las que tengan una relación lineal con el objetivo. Se entiende mejor con un ejemplo. 
 
 # In[ ]:
 
 
-# create target data
+# crear los datos objetivo
 x = np.arange(0, 20, 1)
 y = x**2
 
-# engineer features .
-X = np.c_[x, x**2, x**3]   #<-- added engineered feature
+# construir variables
+X = np.c_[x, x**2, x**3]   #<-- variables construidas
 X_features = ['x','x^2','x^3']
 
 
@@ -139,25 +139,25 @@ ax[0].set_ylabel("y")
 plt.show()
 
 
-# Above, it is clear that the $x^2$ feature mapped against the target value $y$ is linear. Linear regression can then easily generate a model using that feature.
+# Es claro que la variable $x^2$, graficada contra el valor objetivo $y$, tiene una relación lineal. Así, la regresión lineal puede generar fácilmente un modelo con esa variable.
 
-# ### Scaling features
-# As described in the last lab, if the data set has features with significantly different scales, one should apply feature scaling to speed gradient descent. In the example above, there is $x$, $x^2$ and $x^3$ which will naturally have very different scales. Let's apply Z-score normalization to our example.
+# ### Escalado de variables
+# Como vimos en el laboratorio anterior, si el conjunto de datos tiene variables con escalas muy distintas, conviene aplicar escalado de variables para acelerar el descenso de gradiente. En el ejemplo anterior tenemos $x$, $x^2$ y $x^3$, que naturalmente tienen escalas muy diferentes. Apliquemos normalización z-score a nuestro ejemplo.
 
 # In[ ]:
 
 
-# create target data
+# crear los datos objetivo
 x = np.arange(0,20,1)
 X = np.c_[x, x**2, x**3]
-print(f"Peak to Peak range by column in Raw        X:{np.ptp(X,axis=0)}")
+print(f"Rango (máx - mín) por columna en X original:    {np.ptp(X,axis=0)}")
 
-# add mean_normalization 
+# aplicar normalización z-score 
 X = zscore_normalize_features(X)     
-print(f"Peak to Peak range by column in Normalized X:{np.ptp(X,axis=0)}")
+print(f"Rango (máx - mín) por columna en X normalizado: {np.ptp(X,axis=0)}")
 
 
-# Now we can try again with a more aggressive value of alpha:
+# Ahora podemos intentarlo de nuevo con un valor de alfa más agresivo:
 
 # In[ ]:
 
@@ -170,15 +170,15 @@ X = zscore_normalize_features(X)
 
 model_w, model_b = run_gradient_descent_feng(X, y, iterations=100000, alpha=1e-1)
 
-plt.scatter(x, y, marker='x', c='r', label="Actual Value"); plt.title("Normalized x x**2, x**3 feature")
-plt.plot(x,X@model_w + model_b, label="Predicted Value"); plt.xlabel("x"); plt.ylabel("y"); plt.legend(); plt.show()
+plt.scatter(x, y, marker='x', c='r', label="Valor real"); plt.title("Variables x, x**2, x**3 normalizadas")
+plt.plot(x,X@model_w + model_b, label="Valor predicho"); plt.xlabel("x"); plt.ylabel("y"); plt.legend(); plt.show()
 
 
-# Feature scaling allows this to converge much faster.   
-# Note again the values of $\mathbf{w}$. The $w_1$ term, which is the $x^2$ term is the most emphasized. Gradient descent has all but eliminated the $x^3$ term.
+# El escalado de variables hace que converja mucho más rápido.   
+# Observa de nuevo los valores de $\mathbf{w}$. El término $w_1$, que corresponde a $x^2$, es el que tiene más peso. El descenso de gradiente prácticamente eliminó el término $x^3$.
 
-# ### Complex Functions
-# With feature engineering, even quite complex functions can be modeled:
+# ### Funciones complejas
+# Con ingeniería de variables se pueden modelar incluso funciones bastante complejas:
 
 # In[ ]:
 
@@ -191,18 +191,14 @@ X = zscore_normalize_features(X)
 
 model_w,model_b = run_gradient_descent_feng(X, y, iterations=1000000, alpha = 1e-1)
 
-plt.scatter(x, y, marker='x', c='r', label="Actual Value"); plt.title("Normalized x x**2, x**3 feature")
-plt.plot(x,X@model_w + model_b, label="Predicted Value"); plt.xlabel("x"); plt.ylabel("y"); plt.legend(); plt.show()
+plt.scatter(x, y, marker='x', c='r', label="Valor real"); plt.title("Variables x hasta x**13 normalizadas")
+plt.plot(x,X@model_w + model_b, label="Valor predicho"); plt.xlabel("x"); plt.ylabel("y"); plt.legend(); plt.show()
 
 
 # 
-# ## Congratulations!
-# In this lab you:
-# - learned how linear regression can model complex, even highly non-linear functions using feature engineering
-# - recognized that it is important to apply feature scaling when doing feature engineering
+# ## ¡Felicidades!
+# En este laboratorio:
+# - Aprendiste cómo la regresión lineal puede modelar funciones complejas, incluso muy no lineales, usando ingeniería de variables.
+# - Reconociste la importancia de aplicar escalado de variables al hacer ingeniería de variables.
 
 # In[ ]:
-
-
-
-
