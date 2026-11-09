@@ -5,12 +5,12 @@ from matplotlib.widgets import Button, CheckButtons
 from matplotlib.patches import FancyArrowPatch
 from lab_utils_common import np, plt, dlblue, dlorange, sigmoid, dldarkred, gradient_descent
 
-# for debug
-#output = Output() # sends hidden error messages to display when using widgets
+# para depuración
+#output = Output() # muestra los mensajes de error ocultos cuando se usan widgets
 #display(output)
 
 class plt_one_addpt_onclick:
-    """ class to run one interactive plot """
+    """ clase que ejecuta una gráfica interactiva """
     def __init__(self, x, y, w, b, logistic=True):
         self.logistic=logistic
         pos = y == 1
@@ -22,23 +22,23 @@ class plt_one_addpt_onclick:
         fig.canvas.footer_visible = False
 
         plt.subplots_adjust(bottom=0.25)
-        ax.scatter(x[pos], y[pos], marker='x', s=80, c = 'red', label="malignant")
-        ax.scatter(x[neg], y[neg], marker='o', s=100, label="benign", facecolors='none', edgecolors=dlblue,lw=3)
+        ax.scatter(x[pos], y[pos], marker='x', s=80, c = 'red', label="maligno")
+        ax.scatter(x[neg], y[neg], marker='o', s=100, label="benigno", facecolors='none', edgecolors=dlblue,lw=3)
         ax.set_ylim(-0.05,1.1)
         xlim = ax.get_xlim()
         ax.set_xlim(xlim[0],xlim[1]*2)
         ax.set_ylabel('y')
-        ax.set_xlabel('Tumor Size')
+        ax.set_xlabel('Tamaño del tumor')
         self.alegend = ax.legend(loc='lower right')
         if self.logistic:
-            ax.set_title("Example of Logistic Regression on Categorical Data")
+            ax.set_title("Ejemplo de regresión logística con datos categóricos")
         else:
-            ax.set_title("Example of Linear Regression on Categorical Data")
+            ax.set_title("Ejemplo de regresión lineal con datos categóricos")
 
-        ax.text(0.65,0.8,"[Click to add data points]", size=10, transform=ax.transAxes)
+        ax.text(0.6,0.8,"[Haz clic para agregar puntos]", size=10, transform=ax.transAxes)
 
-        axcalc   = plt.axes([0.1, 0.05, 0.38, 0.075])  #l,b,w,h
-        axthresh = plt.axes([0.5, 0.05, 0.38, 0.075])  #l,b,w,h
+        axcalc   = plt.axes([0.1, 0.05, 0.38, 0.075])  #izq., abajo, ancho, alto
+        axthresh = plt.axes([0.5, 0.05, 0.38, 0.075])  #izq., abajo, ancho, alto
         self.tlist = []
 
         self.fig = fig
@@ -56,18 +56,18 @@ class plt_one_addpt_onclick:
 
         self.cid = fig.canvas.mpl_connect('button_press_event', self.add_data)
         if self.logistic:
-            self.bcalc = Button(axcalc, 'Run Logistic Regression (click)', color=dlblue)
+            self.bcalc = Button(axcalc, 'Ejecutar regresión logística (clic)', color=dlblue)
             self.bcalc.on_clicked(self.calc_logistic)
         else:
-            self.bcalc = Button(axcalc, 'Run Linear Regression (click)', color=dlblue)
+            self.bcalc = Button(axcalc, 'Ejecutar regresión lineal (clic)', color=dlblue)
             self.bcalc.on_clicked(self.calc_linear)
-        self.bthresh = CheckButtons(axthresh, ('Toggle 0.5 threshold (after regression)',))
+        self.bthresh = CheckButtons(axthresh, ('Activar umbral de 0.5 (después de la regresión)',))
         self.bthresh.on_clicked(self.thresh)
         self.resize_sq(self.bthresh)
 
- #   @output.capture()  # debug
+ #   @output.capture()  # depuración
     def add_data(self, event):
-        #self.ax[0].text(0.1,0.1, f"in onclick")
+        #self.ax[0].text(0.1,0.1, f"en onclick")
         if event.inaxes == self.ax[0]:
             x_coord = event.xdata
             y_coord = event.ydata
@@ -81,7 +81,7 @@ class plt_one_addpt_onclick:
             self.x = np.append(self.x,x_coord)
         self.fig.canvas.draw()
 
-#   @output.capture()  # debug
+#   @output.capture()  # depuración
     def calc_linear(self, event):
         if self.bthresh.get_status()[0]:
             self.remove_thresh()
@@ -129,10 +129,10 @@ class plt_one_addpt_onclick:
 
     def thresh(self, event):
         if self.bthresh.get_status()[0]:
-            #plt.figtext(0,0, f"in thresh {self.bthresh.get_status()}")
+            #plt.figtext(0,0, f"en thresh {self.bthresh.get_status()}")
             self.draw_thresh()
         else:
-            #plt.figtext(0,0.3, f"in thresh {self.bthresh.get_status()}")
+            #plt.figtext(0,0.3, f"en thresh {self.bthresh.get_status()}")
             self.remove_thresh()
 
     def draw_thresh(self):
@@ -142,7 +142,7 @@ class plt_one_addpt_onclick:
         xlim = self.ax[0].get_xlim()
         a = self.ax[0].fill_between([xlim[0], xp5], [ylim[1], ylim[1]], alpha=0.2, color=dlblue)
         b = self.ax[0].fill_between([xp5, xlim[1]], [ylim[1], ylim[1]], alpha=0.2, color=dldarkred)
-        c = self.ax[0].annotate("Malignant", xy= [xp5,0.5], xycoords='data',
+        c = self.ax[0].annotate("Maligno", xy= [xp5,0.5], xycoords='data',
              xytext=[30,5],textcoords='offset points')
         d = FancyArrowPatch(
             posA=(xp5, 0.5), posB=(xp5+1.5, 0.5), color=dldarkred,
@@ -150,7 +150,7 @@ class plt_one_addpt_onclick:
         )
         self.ax[0].add_artist(d)
 
-        e = self.ax[0].annotate("Benign", xy= [xp5,0.5], xycoords='data',
+        e = self.ax[0].annotate("Benigno", xy= [xp5,0.5], xycoords='data',
                      xytext=[-70,5],textcoords='offset points', ha='left')
         f = FancyArrowPatch(
             posA=(xp5, 0.5), posB=(xp5-1.5, 0.5), color=dlblue,
@@ -162,19 +162,24 @@ class plt_one_addpt_onclick:
         self.fig.canvas.draw()
 
     def remove_thresh(self):
-        #plt.figtext(0.5,0.0, f"rem thresh {self.bthresh.get_status()}")
+        #plt.figtext(0.5,0.0, f"quitar umbral {self.bthresh.get_status()}")
         for artist in self.tlist:
             artist.remove()
         self.fig.canvas.draw()
 
     def resize_sq(self, bcid):
-        """ resizes the check box """
-        #future reference
-        #print(f"width  : {bcid.rectangles[0].get_width()}")
-        #print(f"height : {bcid.rectangles[0].get_height()}")
+        """ cambia el tamaño de la casilla de verificación """
+        #como referencia para el futuro
+        #print(f"ancho  : {bcid.rectangles[0].get_width()}")
+        #print(f"alto   : {bcid.rectangles[0].get_height()}")
         #print(f"xy     : {bcid.rectangles[0].get_xy()}")
         #print(f"bb     : {bcid.rectangles[0].get_bbox()}")
-        #print(f"points : {bcid.rectangles[0].get_bbox().get_points()}")  #[[xmin,ymin],[xmax,ymax]]
+        #print(f"puntos : {bcid.rectangles[0].get_bbox().get_points()}")  #[[xmin,ymin],[xmax,ymax]]
+
+        # Las versiones recientes de matplotlib (3.9 en adelante) ya no tienen
+        # .rectangles ni .lines; en ese caso se deja la casilla con su tamaño normal.
+        if not hasattr(bcid, "rectangles"):
+            return
 
         h = bcid.rectangles[0].get_height()
         bcid.rectangles[0].set_height(3*h)
