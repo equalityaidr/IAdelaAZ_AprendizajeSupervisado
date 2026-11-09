@@ -1,172 +1,172 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# # Optional Lab: Python, NumPy and Vectorization
-# A brief introduction to some of the scientific computing used in this course. In particular the NumPy scientific computing package and its use with python.
+# # Laboratorio opcional: Python, NumPy y vectorización
+# Una breve introducción a parte de la computación científica que se usa en este curso, en particular a la librería de computación científica NumPy y su uso con Python.
 # 
-# # Outline
-# - [&nbsp;&nbsp;1.1 Goals](#toc_40015_1.1)
-# - [&nbsp;&nbsp;1.2 Useful References](#toc_40015_1.2)
-# - [2 Python and NumPy <a name='Python and NumPy'></a>](#toc_40015_2)
-# - [3 Vectors](#toc_40015_3)
-# - [&nbsp;&nbsp;3.1 Abstract](#toc_40015_3.1)
-# - [&nbsp;&nbsp;3.2 NumPy Arrays](#toc_40015_3.2)
-# - [&nbsp;&nbsp;3.3 Vector Creation](#toc_40015_3.3)
-# - [&nbsp;&nbsp;3.4 Operations on Vectors](#toc_40015_3.4)
+# # Contenido
+# - [&nbsp;&nbsp;1.1 Objetivos](#toc_40015_1.1)
+# - [&nbsp;&nbsp;1.2 Referencias útiles](#toc_40015_1.2)
+# - [2 Python y NumPy <a name='Python and NumPy'></a>](#toc_40015_2)
+# - [3 Vectores](#toc_40015_3)
+# - [&nbsp;&nbsp;3.1 Conceptos](#toc_40015_3.1)
+# - [&nbsp;&nbsp;3.2 Arrays de NumPy](#toc_40015_3.2)
+# - [&nbsp;&nbsp;3.3 Creación de vectores](#toc_40015_3.3)
+# - [&nbsp;&nbsp;3.4 Operaciones con vectores](#toc_40015_3.4)
 # - [4 Matrices](#toc_40015_4)
-# - [&nbsp;&nbsp;4.1 Abstract](#toc_40015_4.1)
-# - [&nbsp;&nbsp;4.2 NumPy Arrays](#toc_40015_4.2)
-# - [&nbsp;&nbsp;4.3 Matrix Creation](#toc_40015_4.3)
-# - [&nbsp;&nbsp;4.4 Operations on Matrices](#toc_40015_4.4)
+# - [&nbsp;&nbsp;4.1 Conceptos](#toc_40015_4.1)
+# - [&nbsp;&nbsp;4.2 Arrays de NumPy](#toc_40015_4.2)
+# - [&nbsp;&nbsp;4.3 Creación de matrices](#toc_40015_4.3)
+# - [&nbsp;&nbsp;4.4 Operaciones con matrices](#toc_40015_4.4)
 # 
 
 # In[ ]:
 
 
-import numpy as np    # it is an unofficial standard to use np for numpy
+import numpy as np    # usar np para numpy es un estándar no oficial
 import time
 
 
 # <a name="toc_40015_1.1"></a>
-# ## 1.1 Goals
-# In this lab, you will:
-# - Review the features of NumPy and Python that are used in Course 1
+# ## 1.1 Objetivos
+# En este laboratorio vas a:
+# - Repasar las funcionalidades de NumPy y Python que se usan en el Curso 1
 
 # <a name="toc_40015_1.2"></a>
-# ## 1.2 Useful References
-# - NumPy Documentation including a basic introduction: [NumPy.org](https://NumPy.org/doc/stable/)
-# - A challenging feature topic: [NumPy Broadcasting](https://NumPy.org/doc/stable/user/basics.broadcasting.html)
+# ## 1.2 Referencias útiles
+# - Documentación de NumPy, incluida una introducción básica: [NumPy.org](https://NumPy.org/doc/stable/)
+# - Un tema más desafiante: [Broadcasting en NumPy](https://NumPy.org/doc/stable/user/basics.broadcasting.html)
 # 
 
 # <a name="toc_40015_2"></a>
-# # 2 Python and NumPy <a name='Python and NumPy'></a>
-# Python is the programming language we will be using in this course. It has a set of numeric data types and arithmetic operations. NumPy is a library that extends the base capabilities of python to add a richer data set including more numeric types, vectors, matrices, and many matrix functions. NumPy and python  work together fairly seamlessly. Python arithmetic operators work on NumPy data types and many NumPy functions will accept python data types.
+# # 2 Python y NumPy <a name='Python and NumPy'></a>
+# Python es el lenguaje de programación que usaremos en este curso. Tiene un conjunto de tipos de datos numéricos y operaciones aritméticas. NumPy es una librería que amplía las capacidades básicas de Python con un conjunto de datos más rico, que incluye más tipos numéricos, vectores, matrices y muchas funciones para matrices. NumPy y Python funcionan juntos casi sin fricción: los operadores aritméticos de Python funcionan con los tipos de datos de NumPy, y muchas funciones de NumPy aceptan tipos de datos de Python.
 # 
 
 # <a name="toc_40015_3"></a>
-# # 3 Vectors
+# # 3 Vectores
 # <a name="toc_40015_3.1"></a>
-# ## 3.1 Abstract
-# <img align="right" src="./images/C1_W2_Lab04_Vectors.PNG" style="width:340px;" >Vectors, as you will use them in this course, are ordered arrays of numbers. In notation, vectors are denoted with lower case bold letters such as $\mathbf{x}$.  The elements of a vector are all the same type. A vector does not, for example, contain both characters and numbers. The number of elements in the array is often referred to as the *dimension* though mathematicians may prefer *rank*. The vector shown has a dimension of $n$. The elements of a vector can be referenced with an index. In math settings, indexes typically run from 1 to n. In computer science and these labs, indexing will typically run from 0 to n-1.  In notation, elements of a vector, when referenced individually will indicate the index in a subscript, for example, the $0^{th}$ element, of the vector $\mathbf{x}$ is $x_0$. Note, the x is not bold in this case.  
+# ## 3.1 Conceptos
+# <img align="right" src="./images/C1_W2_Lab04_Vectors.PNG" style="width:340px;" >Los vectores, tal como los usarás en este curso, son arreglos ordenados de números. En la notación, los vectores se escriben con letras minúsculas en negrita, como $\mathbf{x}$. Todos los elementos de un vector son del mismo tipo; un vector no puede, por ejemplo, contener caracteres y números a la vez. Al número de elementos del arreglo se le suele llamar *dimensión*, aunque los matemáticos quizá prefieran *rango*. El vector de la figura tiene dimensión $n$. Los elementos de un vector se pueden referenciar con un índice. En matemáticas, los índices suelen ir de 1 a n; en ciencias de la computación y en estos laboratorios, normalmente van de 0 a n-1. En la notación, cuando se hace referencia a un elemento individual, el índice se indica como subíndice; por ejemplo, el elemento $0$ del vector $\mathbf{x}$ es $x_0$. Observa que en este caso la x no va en negrita.  
 # 
 
 # <a name="toc_40015_3.2"></a>
-# ## 3.2 NumPy Arrays
+# ## 3.2 Arrays de NumPy
 # 
-# NumPy's basic data structure is an indexable, n-dimensional *array* containing elements of the same type (`dtype`). Right away, you may notice we have overloaded the term 'dimension'. Above, it was the number of elements in the vector, here, dimension refers to the number of indexes of an array. A one-dimensional or 1-D array has one index. In Course 1, we will represent vectors as NumPy 1-D arrays. 
+# La estructura de datos básica de NumPy es un *array* n-dimensional e indexable, cuyos elementos son todos del mismo tipo (`dtype`). Notarás enseguida que estamos usando el término "dimensión" con dos significados. Arriba era el número de elementos del vector; aquí, dimensión se refiere al número de índices de un array. Un array unidimensional (1-D) tiene un solo índice. En el Curso 1 representaremos los vectores como arrays 1-D de NumPy. 
 # 
-#  - 1-D array, shape (n,): n elements indexed [0] through [n-1]
+#  - Array 1-D, forma (n,): n elementos, indexados de [0] a [n-1]
 #  
 
 # <a name="toc_40015_3.3"></a>
-# ## 3.3 Vector Creation
+# ## 3.3 Creación de vectores
 # 
 
-# Data creation routines in NumPy will generally have a first parameter which is the shape of the object. This can either be a single value for a 1-D result or a tuple (n,m,...) specifying the shape of the result. Below are examples of creating vectors using these routines.
+# Las funciones de NumPy para crear datos suelen tener como primer parámetro la forma (shape) del objeto. Puede ser un solo valor, para un resultado 1-D, o una tupla (n,m,...) que especifica la forma del resultado. Abajo hay ejemplos de cómo crear vectores con estas funciones.
 
 # In[ ]:
 
 
-# NumPy routines which allocate memory and fill arrays with value
-a = np.zeros(4);                print(f"np.zeros(4) :   a = {a}, a shape = {a.shape}, a data type = {a.dtype}")
-a = np.zeros((4,));             print(f"np.zeros(4,) :  a = {a}, a shape = {a.shape}, a data type = {a.dtype}")
-a = np.random.random_sample(4); print(f"np.random.random_sample(4): a = {a}, a shape = {a.shape}, a data type = {a.dtype}")
+# Funciones de NumPy que reservan memoria y llenan los arrays con valores
+a = np.zeros(4);                print(f"np.zeros(4) :   a = {a}, forma de a = {a.shape}, tipo de dato de a = {a.dtype}")
+a = np.zeros((4,));             print(f"np.zeros(4,) :  a = {a}, forma de a = {a.shape}, tipo de dato de a = {a.dtype}")
+a = np.random.random_sample(4); print(f"np.random.random_sample(4): a = {a}, forma de a = {a.shape}, tipo de dato de a = {a.dtype}")
 
 
-# Some data creation routines do not take a shape tuple:
-
-# In[ ]:
-
-
-# NumPy routines which allocate memory and fill arrays with value but do not accept shape as input argument
-a = np.arange(4.);              print(f"np.arange(4.):     a = {a}, a shape = {a.shape}, a data type = {a.dtype}")
-a = np.random.rand(4);          print(f"np.random.rand(4): a = {a}, a shape = {a.shape}, a data type = {a.dtype}")
-
-
-# values can be specified manually as well. 
+# Algunas funciones de creación de datos no reciben una tupla de forma:
 
 # In[ ]:
 
 
-# NumPy routines which allocate memory and fill with user specified values
-a = np.array([5,4,3,2]);  print(f"np.array([5,4,3,2]):  a = {a},     a shape = {a.shape}, a data type = {a.dtype}")
-a = np.array([5.,4,3,2]); print(f"np.array([5.,4,3,2]): a = {a}, a shape = {a.shape}, a data type = {a.dtype}")
+# Funciones de NumPy que reservan memoria y llenan los arrays con valores, pero no aceptan la forma como argumento
+a = np.arange(4.);              print(f"np.arange(4.):     a = {a}, forma de a = {a.shape}, tipo de dato de a = {a.dtype}")
+a = np.random.rand(4);          print(f"np.random.rand(4): a = {a}, forma de a = {a.shape}, tipo de dato de a = {a.dtype}")
 
 
-# These have all created a one-dimensional vector  `a` with four elements. `a.shape` returns the dimensions. Here we see a.shape = `(4,)` indicating a 1-d array with 4 elements.  
+# También se pueden especificar los valores manualmente. 
+
+# In[ ]:
+
+
+# Funciones de NumPy que reservan memoria y llenan con valores especificados por el usuario
+a = np.array([5,4,3,2]);  print(f"np.array([5,4,3,2]):  a = {a},     forma de a = {a.shape}, tipo de dato de a = {a.dtype}")
+a = np.array([5.,4,3,2]); print(f"np.array([5.,4,3,2]): a = {a}, forma de a = {a.shape}, tipo de dato de a = {a.dtype}")
+
+
+# Todos estos ejemplos crearon un vector unidimensional `a` con cuatro elementos. `a.shape` devuelve las dimensiones. Aquí vemos que a.shape = `(4,)`, lo que indica un array 1-D con 4 elementos.  
 
 # <a name="toc_40015_3.4"></a>
-# ## 3.4 Operations on Vectors
-# Let's explore some operations using vectors.
+# ## 3.4 Operaciones con vectores
+# Exploremos algunas operaciones con vectores.
 # <a name="toc_40015_3.4.1"></a>
-# ### 3.4.1 Indexing
-# Elements of vectors can be accessed via indexing and slicing. NumPy provides a very complete set of indexing and slicing capabilities. We will explore only the basics needed for the course here. Reference [Slicing and Indexing](https://NumPy.org/doc/stable/reference/arrays.indexing.html) for more details.  
-# **Indexing** means referring to *an element* of an array by its position within the array.  
-# **Slicing** means getting a *subset* of elements from an array based on their indices.  
-# NumPy starts indexing at zero so the 3rd element of an vector $\mathbf{a}$ is `a[2]`.
+# ### 3.4.1 Indexación
+# Se puede acceder a los elementos de un vector mediante indexación y rebanado (slicing). NumPy ofrece un conjunto muy completo de herramientas de indexación y rebanado; aquí exploraremos solo lo básico que se necesita para el curso. Consulta [Slicing and Indexing](https://NumPy.org/doc/stable/reference/arrays.indexing.html) para más detalles.  
+# **Indexar** significa referirse a *un elemento* de un array por su posición dentro del array.  
+# **Rebanar** (slicing) significa obtener un *subconjunto* de elementos de un array según sus índices.  
+# NumPy empieza a indexar en cero, así que el 3er elemento de un vector $\mathbf{a}$ es `a[2]`.
 
 # In[ ]:
 
 
-#vector indexing operations on 1-D vectors
+#operaciones de indexación en vectores 1-D
 a = np.arange(10)
 print(a)
 
-#access an element
-print(f"a[2].shape: {a[2].shape} a[2]  = {a[2]}, Accessing an element returns a scalar")
+#acceder a un elemento
+print(f"a[2].shape: {a[2].shape} a[2]  = {a[2]}, Acceder a un elemento devuelve un escalar")
 
-# access the last element, negative indexes count from the end
+# acceder al último elemento; los índices negativos cuentan desde el final
 print(f"a[-1] = {a[-1]}")
 
-#indexs must be within the range of the vector or they will produce and error
+#los índices deben estar dentro del rango del vector; si no, producen un error
 try:
     c = a[10]
 except Exception as e:
-    print("The error message you'll see is:")
+    print("El mensaje de error que verás es:")
     print(e)
 
 
 # <a name="toc_40015_3.4.2"></a>
-# ### 3.4.2 Slicing
-# Slicing creates an array of indices using a set of three values (`start:stop:step`). A subset of values is also valid. Its use is best explained by example:
+# ### 3.4.2 Rebanado (slicing)
+# El rebanado crea un array de índices usando un conjunto de tres valores (`inicio:fin:paso`). También es válido usar solo algunos de ellos. Se entiende mejor con ejemplos:
 
 # In[ ]:
 
 
-#vector slicing operations
+#operaciones de rebanado en vectores
 a = np.arange(10)
 print(f"a         = {a}")
 
-#access 5 consecutive elements (start:stop:step)
+#acceder a 5 elementos consecutivos (inicio:fin:paso)
 c = a[2:7:1];     print("a[2:7:1] = ", c)
 
-# access 3 elements separated by two 
+# acceder a 3 elementos separados de dos en dos 
 c = a[2:7:2];     print("a[2:7:2] = ", c)
 
-# access all elements index 3 and above
+# acceder a todos los elementos desde el índice 3 en adelante
 c = a[3:];        print("a[3:]    = ", c)
 
-# access all elements below index 3
+# acceder a todos los elementos antes del índice 3
 c = a[:3];        print("a[:3]    = ", c)
 
-# access all elements
+# acceder a todos los elementos
 c = a[:];         print("a[:]     = ", c)
 
 
 # <a name="toc_40015_3.4.3"></a>
-# ### 3.4.3 Single vector operations
-# There are a number of useful operations that involve operations on a single vector.
+# ### 3.4.3 Operaciones con un solo vector
+# Hay varias operaciones útiles que se aplican a un solo vector.
 
 # In[ ]:
 
 
 a = np.array([1,2,3,4])
 print(f"a             : {a}")
-# negate elements of a
+# negar los elementos de a
 b = -a 
 print(f"b = -a        : {b}")
 
-# sum all elements of a, returns a scalar
+# sumar todos los elementos de a; devuelve un escalar
 b = np.sum(a) 
 print(f"b = np.sum(a) : {b}")
 
@@ -178,8 +178,8 @@ print(f"b = a**2      : {b}")
 
 
 # <a name="toc_40015_3.4.4"></a>
-# ### 3.4.4 Vector Vector element-wise operations
-# Most of the NumPy arithmetic, logical and comparison operations apply to vectors as well. These operators work on an element-by-element basis. For example 
+# ### 3.4.4 Operaciones elemento a elemento entre vectores
+# La mayoría de las operaciones aritméticas, lógicas y de comparación de NumPy también se aplican a vectores. Estos operadores funcionan elemento por elemento. Por ejemplo: 
 # $$ c_i = a_i + b_i $$
 
 # In[ ]:
@@ -187,62 +187,62 @@ print(f"b = a**2      : {b}")
 
 a = np.array([ 1, 2, 3, 4])
 b = np.array([-1,-2, 3, 4])
-print(f"Binary operators work element wise: {a + b}")
+print(f"Los operadores binarios funcionan elemento a elemento: {a + b}")
 
 
-# Of course, for this to work correctly, the vectors must be of the same size:
+# Por supuesto, para que esto funcione correctamente, los vectores deben tener el mismo tamaño:
 
 # In[ ]:
 
 
-#try a mismatched vector operation
+#intentar una operación con vectores de distinto tamaño
 c = np.array([1, 2])
 try:
     d = a + c
 except Exception as e:
-    print("The error message you'll see is:")
+    print("El mensaje de error que verás es:")
     print(e)
 
 
 # <a name="toc_40015_3.4.5"></a>
-# ### 3.4.5 Scalar Vector operations
-# Vectors can be 'scaled' by scalar values. A scalar value is just a number. The scalar multiplies all the elements of the vector.
+# ### 3.4.5 Operaciones entre un escalar y un vector
+# Los vectores se pueden "escalar" con valores escalares. Un valor escalar es simplemente un número. El escalar multiplica todos los elementos del vector.
 
 # In[ ]:
 
 
 a = np.array([1, 2, 3, 4])
 
-# multiply a by a scalar
+# multiplicar a por un escalar
 b = 5 * a 
 print(f"b = 5 * a : {b}")
 
 
 # <a name="toc_40015_3.4.6"></a>
-# ### 3.4.6 Vector Vector dot product
-# The dot product is a mainstay of Linear Algebra and NumPy. This is an operation used extensively in this course and should be well understood. The dot product is shown below.
+# ### 3.4.6 Producto punto entre vectores
+# El producto punto es un pilar del álgebra lineal y de NumPy. Es una operación que se usa mucho en este curso y conviene entenderla bien. El producto punto se muestra abajo.
 
 # <img src="./images/C1_W2_Lab04_dot_notrans.gif" width=800> 
 
-# The dot product multiplies the values in two vectors element-wise and then sums the result.
-# Vector dot product requires the dimensions of the two vectors to be the same. 
+# El producto punto multiplica los valores de dos vectores elemento a elemento y luego suma los resultados.
+# El producto punto requiere que los dos vectores tengan la misma dimensión. 
 
-# Let's implement our own version of the dot product below:
+# Implementemos nuestra propia versión del producto punto:
 # 
-# **Using a for loop**, implement a function which returns the dot product of two vectors. The function to return given inputs $a$ and $b$:
+# **Usando un ciclo for**, implementa una función que devuelva el producto punto de dos vectores. Dadas las entradas $a$ y $b$, la función debe devolver:
 # $$ x = \sum_{i=0}^{n-1} a_i b_i $$
-# Assume both `a` and `b` are the same shape.
+# Supón que `a` y `b` tienen la misma forma.
 
 # In[ ]:
 
 
 def my_dot(a, b): 
     """
-   Compute the dot product of two vectors
+    Calcula el producto punto de dos vectores
  
     Args:
-      a (ndarray (n,)):  input vector 
-      b (ndarray (n,)):  input vector with same dimension as a
+      a (ndarray (n,)):  vector de entrada 
+      b (ndarray (n,)):  vector de entrada con la misma dimensión que a
     
     Returns:
       x (scalar): 
@@ -256,81 +256,81 @@ def my_dot(a, b):
 # In[ ]:
 
 
-# test 1-D
+# prueba 1-D
 a = np.array([1, 2, 3, 4])
 b = np.array([-1, 4, 3, 2])
 print(f"my_dot(a, b) = {my_dot(a, b)}")
 
 
-# Note, the dot product is expected to return a scalar value. 
+# Observa que se espera que el producto punto devuelva un valor escalar. 
 # 
-# Let's try the same operations using `np.dot`.  
+# Probemos las mismas operaciones usando `np.dot`.  
 
 # In[ ]:
 
 
-# test 1-D
+# prueba 1-D
 a = np.array([1, 2, 3, 4])
 b = np.array([-1, 4, 3, 2])
 c = np.dot(a, b)
 print(f"NumPy 1-D np.dot(a, b) = {c}, np.dot(a, b).shape = {c.shape} ") 
 c = np.dot(b, a)
-print(f"NumPy 1-D np.dot(b, a) = {c}, np.dot(a, b).shape = {c.shape} ")
+print(f"NumPy 1-D np.dot(b, a) = {c}, np.dot(b, a).shape = {c.shape} ")
 
 
-# Above, you will note that the results for 1-D matched our implementation.
+# Verás que los resultados en 1-D coinciden con nuestra implementación.
 
 # <a name="toc_40015_3.4.7"></a>
-# ### 3.4.7 The Need for Speed: vector vs for loop
-# We utilized the NumPy  library because it improves speed memory efficiency. Let's demonstrate:
+# ### 3.4.7 La necesidad de velocidad: vectorización vs. ciclo for
+# Usamos la librería NumPy porque mejora la velocidad y la eficiencia en el uso de memoria. Demostrémoslo:
 
 # In[ ]:
 
 
 np.random.seed(1)
-a = np.random.rand(10000000)  # very large arrays
+a = np.random.rand(10000000)  # arrays muy grandes
 b = np.random.rand(10000000)
 
-tic = time.time()  # capture start time
+tic = time.time()  # registrar el tiempo de inicio
 c = np.dot(a, b)
-toc = time.time()  # capture end time
+toc = time.time()  # registrar el tiempo de fin
 
 print(f"np.dot(a, b) =  {c:.4f}")
-print(f"Vectorized version duration: {1000*(toc-tic):.4f} ms ")
+print(f"Duración de la versión vectorizada: {1000*(toc-tic):.4f} ms ")
 
-tic = time.time()  # capture start time
+tic = time.time()  # registrar el tiempo de inicio
 c = my_dot(a,b)
-toc = time.time()  # capture end time
+toc = time.time()  # registrar el tiempo de fin
 
 print(f"my_dot(a, b) =  {c:.4f}")
-print(f"loop version duration: {1000*(toc-tic):.4f} ms ")
+print(f"Duración de la versión con ciclo: {1000*(toc-tic):.4f} ms ")
 
-del(a);del(b)  #remove these big arrays from memory
+del(a);del(b)  #eliminar estos arrays grandes de la memoria
 
 
-# So, vectorization provides a large speed up in this example. This is because NumPy makes better use of available data parallelism in the underlying hardware. GPU's and modern CPU's implement Single Instruction, Multiple Data (SIMD) pipelines allowing multiple operations to be issued in parallel. This is critical in Machine Learning where the data sets are often very large.
+# Como ves, la vectorización acelera mucho el cálculo en este ejemplo. Esto se debe a que NumPy aprovecha mejor el paralelismo de datos disponible en el hardware. Las GPU y las CPU modernas implementan canales SIMD (Single Instruction, Multiple Data: una instrucción, múltiples datos), que permiten ejecutar varias operaciones en paralelo. Esto es fundamental en Machine Learning, donde los conjuntos de datos suelen ser muy grandes.
 
 # <a name="toc_12345_3.4.8"></a>
-# ### 3.4.8 Vector Vector operations in Course 1
-# Vector Vector operations will appear frequently in course 1. Here is why:
-# - Going forward, our examples will be stored in an array, `X_train` of dimension (m,n). This will be explained more in context, but here it is important to note it is a 2 Dimensional array or matrix (see next section on matrices).
-# - `w` will be a 1-dimensional vector of shape (n,).
-# - we will perform operations by looping through the examples, extracting each example to work on individually by indexing X. For example:`X[i]`
-# - `X[i]` returns a value of shape (n,), a 1-dimensional vector. Consequently, operations involving `X[i]` are often vector-vector.  
+# ### 3.4.8 Operaciones entre vectores en el Curso 1
+# Las operaciones entre vectores aparecerán con frecuencia en el Curso 1. Esta es la razón:
+# - De aquí en adelante, nuestros ejemplos se guardarán en un array, `X_train`, de dimensión (m,n). Esto se explicará mejor en contexto, pero por ahora es importante notar que es un array bidimensional, es decir, una matriz (ver la siguiente sección sobre matrices).
+# - `w` será un vector unidimensional de forma (n,).
+# - Haremos operaciones recorriendo los ejemplos y extrayendo cada uno para trabajarlo individualmente, indexando X. Por ejemplo: `X[i]`
+# - `X[i]` devuelve un valor de forma (n,), un vector unidimensional. Por lo tanto, las operaciones con `X[i]` suelen ser operaciones entre vectores.  
 # 
-# That is a somewhat lengthy explanation, but aligning and understanding the shapes of your operands is important when performing vector operations.
+# Es una explicación algo larga, pero al trabajar con vectores es importante entender y hacer coincidir las formas de los operandos.
 
 # In[ ]:
 
 
-# show common Course 1 example
+# mostrar un ejemplo típico del Curso 1
 X = np.array([[1],[2],[3],[4]])
 w = np.array([2])
 c = np.dot(X[1], w)
 
-print(f"X[1] has shape {X[1].shape}")
-print(f"w has shape {w.shape}")
-print(f"c has shape {c.shape}")
+print(f"X[1] tiene forma {X[1].shape}")
+print(f"w tiene forma {w.shape}")
+print(f"c tiene forma {c.shape}")
 
 
 # <a name="toc_40015_4"></a>
@@ -338,123 +338,119 @@ print(f"c has shape {c.shape}")
 # 
 
 # <a name="toc_40015_4.1"></a>
-# ## 4.1 Abstract
-# Matrices, are two dimensional arrays. The elements of a matrix are all of the same type. In notation, matrices are denoted with capitol, bold letter such as $\mathbf{X}$. In this and other labs, `m` is often the number of rows and `n` the number of columns. The elements of a matrix can be referenced with a two dimensional index. In math settings, numbers in the index typically run from 1 to n. In computer science and these labs, indexing will run from 0 to n-1.  
+# ## 4.1 Conceptos
+# Las matrices son arrays bidimensionales. Todos los elementos de una matriz son del mismo tipo. En la notación, las matrices se escriben con letras mayúsculas en negrita, como $\mathbf{X}$. En este y otros laboratorios, `m` suele ser el número de filas y `n` el número de columnas. Los elementos de una matriz se referencian con un índice bidimensional. En matemáticas, los índices suelen ir de 1 a n; en ciencias de la computación y en estos laboratorios, van de 0 a n-1.  
 # <figure>
 #     <center> <img src="./images/C1_W2_Lab04_Matrices.PNG"  alt='missing'  width=900><center/>
-#     <figcaption> Generic Matrix Notation, 1st index is row, 2nd is column </figcaption>
+#     <figcaption> Notación general de matrices: el 1er índice es la fila y el 2do es la columna </figcaption>
 # <figure/>
 
 # <a name="toc_40015_4.2"></a>
-# ## 4.2 NumPy Arrays
+# ## 4.2 Arrays de NumPy
 # 
-# NumPy's basic data structure is an indexable, n-dimensional *array* containing elements of the same type (`dtype`). These were described earlier. Matrices have a two-dimensional (2-D) index [m,n].
+# La estructura de datos básica de NumPy es un *array* n-dimensional e indexable, cuyos elementos son todos del mismo tipo (`dtype`), como se describió antes. Las matrices tienen un índice bidimensional (2-D) [m,n].
 # 
-# In Course 1, 2-D matrices are used to hold training data. Training data is $m$ examples by $n$ features creating an (m,n) array. Course 1 does not do operations directly on matrices but typically extracts an example as a vector and operates on that. Below you will review: 
-# - data creation
-# - slicing and indexing
+# En el Curso 1, las matrices 2-D se usan para guardar los datos de entrenamiento. Los datos de entrenamiento tienen $m$ ejemplos por $n$ variables, lo que forma un array (m,n). El Curso 1 no hace operaciones directamente sobre matrices; normalmente extrae un ejemplo como vector y opera sobre él. A continuación repasarás: 
+# - creación de datos
+# - rebanado e indexación
 
 # <a name="toc_40015_4.3"></a>
-# ## 4.3 Matrix Creation
-# The same functions that created 1-D vectors will create 2-D or n-D arrays. Here are some examples
+# ## 4.3 Creación de matrices
+# Las mismas funciones que crean vectores 1-D crean arrays 2-D o n-D. Aquí hay algunos ejemplos.
 # 
 
-# Below, the shape tuple is provided to achieve a 2-D result. Notice how NumPy uses brackets to denote each dimension. Notice further than NumPy, when printing, will print one row per line.
+# Abajo se pasa la tupla de forma para obtener un resultado 2-D. Observa cómo NumPy usa corchetes para indicar cada dimensión. Observa también que, al imprimir, NumPy muestra una fila por línea.
 # 
 
 # In[ ]:
 
 
 a = np.zeros((1, 5))                                       
-print(f"a shape = {a.shape}, a = {a}")                     
+print(f"forma de a = {a.shape}, a = {a}")                     
 
 a = np.zeros((2, 1))                                                                   
-print(f"a shape = {a.shape}, a = {a}") 
+print(f"forma de a = {a.shape}, a = {a}") 
 
 a = np.random.random_sample((1, 1))  
-print(f"a shape = {a.shape}, a = {a}") 
+print(f"forma de a = {a.shape}, a = {a}") 
 
 
-# One can also manually specify data. Dimensions are specified with additional brackets matching the format in the printing above.
+# También se pueden especificar los datos manualmente. Las dimensiones se indican con corchetes adicionales, siguiendo el mismo formato que se ve al imprimir.
 
 # In[ ]:
 
 
-# NumPy routines which allocate memory and fill with user specified values
-a = np.array([[5], [4], [3]]);   print(f" a shape = {a.shape}, np.array: a = {a}")
-a = np.array([[5],   # One can also
-              [4],   # separate values
-              [3]]); #into separate rows
-print(f" a shape = {a.shape}, np.array: a = {a}")
+# Funciones de NumPy que reservan memoria y llenan con valores especificados por el usuario
+a = np.array([[5], [4], [3]]);   print(f" forma de a = {a.shape}, np.array: a = {a}")
+a = np.array([[5],   # También se pueden
+              [4],   # separar los valores
+              [3]]); # en filas distintas
+print(f" forma de a = {a.shape}, np.array: a = {a}")
 
 
 # <a name="toc_40015_4.4"></a>
-# ## 4.4 Operations on Matrices
-# Let's explore some operations using matrices.
+# ## 4.4 Operaciones con matrices
+# Exploremos algunas operaciones con matrices.
 
 # <a name="toc_40015_4.4.1"></a>
-# ### 4.4.1 Indexing
+# ### 4.4.1 Indexación
 # 
 
-# Matrices include a second index. The two indexes describe [row, column]. Access can either return an element or a row/column. See below:
+# Las matrices tienen un segundo índice. Los dos índices describen [fila, columna]. Al acceder, se puede obtener un elemento o una fila/columna. Mira abajo:
 
 # In[ ]:
 
 
-#vector indexing operations on matrices
-a = np.arange(6).reshape(-1, 2)   #reshape is a convenient way to create matrices
+#operaciones de indexación en matrices
+a = np.arange(6).reshape(-1, 2)   #reshape es una forma práctica de crear matrices
 print(f"a.shape: {a.shape}, \na= {a}")
 
-#access an element
-print(f"\na[2,0].shape:   {a[2, 0].shape}, a[2,0] = {a[2, 0]},     type(a[2,0]) = {type(a[2, 0])} Accessing an element returns a scalar\n")
+#acceder a un elemento
+print(f"\na[2,0].shape:   {a[2, 0].shape}, a[2,0] = {a[2, 0]},     type(a[2,0]) = {type(a[2, 0])} Acceder a un elemento devuelve un escalar\n")
 
-#access a row
+#acceder a una fila
 print(f"a[2].shape:   {a[2].shape}, a[2]   = {a[2]}, type(a[2])   = {type(a[2])}")
 
 
-# It is worth drawing attention to the last example. Accessing a matrix by just specifying the row will return a *1-D vector*.
+# Vale la pena prestar atención al último ejemplo: acceder a una matriz indicando solo la fila devuelve un *vector 1-D*.
 
 # **Reshape**  
-# The previous example used [reshape](https://numpy.org/doc/stable/reference/generated/numpy.reshape.html) to shape the array.  
+# El ejemplo anterior usó [reshape](https://numpy.org/doc/stable/reference/generated/numpy.reshape.html) para darle forma al array.  
 # `a = np.arange(6).reshape(-1, 2) `   
-# This line of code first created a *1-D Vector* of six elements. It then reshaped that vector into a *2-D* array using the reshape command. This could have been written:  
+# Esta línea primero crea un *vector 1-D* de seis elementos y luego lo transforma en un array *2-D* con el comando reshape. También se podría haber escrito:  
 # `a = np.arange(6).reshape(3, 2) `  
-# To arrive at the same 3 row, 2 column array.
-# The -1 argument tells the routine to compute the number of rows given the size of the array and the number of columns.
+# para obtener el mismo array de 3 filas y 2 columnas.
+# El argumento -1 le indica a la función que calcule el número de filas a partir del tamaño del array y del número de columnas.
 # 
 
 # <a name="toc_40015_4.4.2"></a>
-# ### 4.4.2 Slicing
-# Slicing creates an array of indices using a set of three values (`start:stop:step`). A subset of values is also valid. Its use is best explained by example:
+# ### 4.4.2 Rebanado (slicing)
+# El rebanado crea un array de índices usando un conjunto de tres valores (`inicio:fin:paso`). También es válido usar solo algunos de ellos. Se entiende mejor con ejemplos:
 
 # In[ ]:
 
 
-#vector 2-D slicing operations
+#operaciones de rebanado en arrays 2-D
 a = np.arange(20).reshape(-1, 10)
 print(f"a = \n{a}")
 
-#access 5 consecutive elements (start:stop:step)
-print("a[0, 2:7:1] = ", a[0, 2:7:1], ",  a[0, 2:7:1].shape =", a[0, 2:7:1].shape, "a 1-D array")
+#acceder a 5 elementos consecutivos (inicio:fin:paso)
+print("a[0, 2:7:1] = ", a[0, 2:7:1], ",  a[0, 2:7:1].shape =", a[0, 2:7:1].shape, "un array 1-D")
 
-#access 5 consecutive elements (start:stop:step) in two rows
-print("a[:, 2:7:1] = \n", a[:, 2:7:1], ",  a[:, 2:7:1].shape =", a[:, 2:7:1].shape, "a 2-D array")
+#acceder a 5 elementos consecutivos (inicio:fin:paso) en las dos filas
+print("a[:, 2:7:1] = \n", a[:, 2:7:1], ",  a[:, 2:7:1].shape =", a[:, 2:7:1].shape, "un array 2-D")
 
-# access all elements
+# acceder a todos los elementos
 print("a[:,:] = \n", a[:,:], ",  a[:,:].shape =", a[:,:].shape)
 
-# access all elements in one row (very common usage)
-print("a[1,:] = ", a[1,:], ",  a[1,:].shape =", a[1,:].shape, "a 1-D array")
-# same as
-print("a[1]   = ", a[1],   ",  a[1].shape   =", a[1].shape, "a 1-D array")
+# acceder a todos los elementos de una fila (uso muy común)
+print("a[1,:] = ", a[1,:], ",  a[1,:].shape =", a[1,:].shape, "un array 1-D")
+# equivale a
+print("a[1]   = ", a[1],   ",  a[1].shape   =", a[1].shape, "un array 1-D")
 
 
 # <a name="toc_40015_5.0"></a>
-# ## Congratulations!
-# In this lab you mastered the features of Python and NumPy that are needed for Course 1.
+# ## ¡Felicidades!
+# En este laboratorio dominaste las funcionalidades de Python y NumPy que se necesitan para el Curso 1.
 
 # In[ ]:
-
-
-
-
