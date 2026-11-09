@@ -1,17 +1,17 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# # Optional Lab: Feature scaling and Learning Rate (Multi-variable)
+# # Laboratorio opcional: Escalado de variables y tasa de aprendizaje (múltiples variables)
 
-# ## Goals
-# In this lab you will:
-# - Utilize  the multiple variables routines developed in the previous lab
-# - run Gradient Descent on a data set with multiple features
-# - explore the impact of the *learning rate alpha* on gradient descent
-# - improve performance of gradient descent by *feature scaling* using z-score normalization
+# ## Objetivos
+# En este laboratorio vas a:
+# - Usar las funciones para múltiples variables desarrolladas en el laboratorio anterior
+# - Ejecutar descenso de gradiente sobre un conjunto de datos con múltiples variables
+# - Explorar el efecto de la *tasa de aprendizaje alfa* en el descenso de gradiente
+# - Mejorar el desempeño del descenso de gradiente mediante *escalado de variables* con normalización z-score
 
-# ## Tools
-# You will utilize the functions developed in the last lab as well as matplotlib and NumPy. 
+# ## Herramientas
+# Usarás las funciones desarrolladas en el laboratorio anterior, además de Matplotlib y NumPy. 
 
 # In[ ]:
 
@@ -25,33 +25,33 @@ np.set_printoptions(precision=2)
 #plt.style.use('./deeplearning.mplstyle')
 
 
-# ## Notation
+# ## Notación
 # 
-# |General <br />  Notation  | Description| Python (if applicable) |
+# |General <br />  Notación  | Descripción| Python (si aplica) |
 # |: ------------|: ------------------------------------------------------------||
-# | $a$ | scalar, non bold                                                      ||
-# | $\mathbf{a}$ | vector, bold                                                 ||
-# | $\mathbf{A}$ | matrix, bold capital                                         ||
-# | **Regression** |         |    |     |
-# |  $\mathbf{X}$ | training example maxtrix                  | `X_train` |   
-# |  $\mathbf{y}$  | training example  targets                | `y_train` 
-# |  $\mathbf{x}^{(i)}$, $y^{(i)}$ | $i_{th}$Training Example | `X[i]`, `y[i]`|
-# | m | number of training examples | `m`|
-# | n | number of features in each example | `n`|
-# |  $\mathbf{w}$  |  parameter: weight,                       | `w`    |
-# |  $b$           |  parameter: bias                                           | `b`    |     
-# | $f_{\mathbf{w},b}(\mathbf{x}^{(i)})$ | The result of the model evaluation at  $\mathbf{x}^{(i)}$ parameterized by $\mathbf{w},b$: $f_{\mathbf{w},b}(\mathbf{x}^{(i)}) = \mathbf{w} \cdot \mathbf{x}^{(i)}+b$  | `f_wb` | 
-# |$\frac{\partial J(\mathbf{w},b)}{\partial w_j}$| the gradient or partial derivative of cost with respect to a parameter $w_j$ |`dj_dw[j]`| 
-# |$\frac{\partial J(\mathbf{w},b)}{\partial b}$| the gradient or partial derivative of cost with respect to a parameter $b$| `dj_db`|
+# | $a$ | escalar, sin negrita                                                      ||
+# | $\mathbf{a}$ | vector, en negrita                                                 ||
+# | $\mathbf{A}$ | matriz, mayúscula en negrita                                         ||
+# | **Regresión** |         |    |     |
+# |  $\mathbf{X}$ | matriz de ejemplos de entrenamiento                  | `X_train` |   
+# |  $\mathbf{y}$  | valores objetivo de los ejemplos de entrenamiento                | `y_train` 
+# |  $\mathbf{x}^{(i)}$, $y^{(i)}$ | $i$-ésimo ejemplo de entrenamiento | `X[i]`, `y[i]`|
+# | m | número de ejemplos de entrenamiento | `m`|
+# | n | número de variables en cada ejemplo | `n`|
+# |  $\mathbf{w}$  |  parámetro: pesos                       | `w`    |
+# |  $b$           |  parámetro: sesgo                                           | `b`    |     
+# | $f_{\mathbf{w},b}(\mathbf{x}^{(i)})$ | Resultado de evaluar el modelo en $\mathbf{x}^{(i)}$, parametrizado por $\mathbf{w},b$: $f_{\mathbf{w},b}(\mathbf{x}^{(i)}) = \mathbf{w} \cdot \mathbf{x}^{(i)}+b$  | `f_wb` | 
+# |$\frac{\partial J(\mathbf{w},b)}{\partial w_j}$| el gradiente o derivada parcial del costo con respecto al parámetro $w_j$ |`dj_dw[j]`| 
+# |$\frac{\partial J(\mathbf{w},b)}{\partial b}$| el gradiente o derivada parcial del costo con respecto al parámetro $b$| `dj_db`|
 
-# #  Problem Statement
+# #  Planteamiento del problema
 # 
-# As in the previous labs, you will use the motivating example of housing price prediction. The training data set contains many examples with 4 features (size, bedrooms, floors and age) shown in the table below. Note, in this lab, the Size feature is in sqft while earlier labs utilized 1000 sqft.  This data set is larger than the previous lab.
+# Como en los laboratorios anteriores, usarás el ejemplo de predicción del precio de viviendas. El conjunto de entrenamiento contiene muchos ejemplos con 4 variables (tamaño, habitaciones, pisos y antigüedad), como se muestra en la tabla. Observa que en este laboratorio el tamaño está en pies², mientras que en los primeros laboratorios estaba en miles de pies². Este conjunto de datos es más grande que el del laboratorio anterior.
 # 
-# We would like to build a linear regression model using these values so we can then predict the price for other houses - say, a house with 1200 sqft, 3 bedrooms, 1 floor, 40 years old. 
+# Queremos construir un modelo de regresión lineal con estos valores para luego predecir el precio de otras casas; por ejemplo, una casa de 1200 pies², 3 habitaciones, 1 piso y 40 años de antigüedad. 
 # 
-# ##  Dataset: 
-# | Size (sqft) | Number of Bedrooms  | Number of floors | Age of  Home | Price (1000s dollars)  |   
+# ##  Conjunto de datos: 
+# | Tamaño (pies²) | Número de habitaciones  | Número de pisos | Antigüedad de la casa | Precio (miles de dólares)  |   
 # | ----------------| ------------------- |----------------- |--------------|----------------------- |  
 # | 952             | 2                   | 1                | 65           | 271.5                  |  
 # | 1244            | 3                   | 2                | 64           | 232                    |  
@@ -62,12 +62,12 @@ np.set_printoptions(precision=2)
 # In[ ]:
 
 
-# load the dataset
+# cargar el conjunto de datos
 X_train, y_train = load_house_data()
-X_features = ['size(sqft)','bedrooms','floors','age']
+X_features = ['tamaño (pies²)','habitaciones','pisos','antigüedad']
 
 
-# Let's view the dataset and its features by plotting each feature versus price.
+# Veamos el conjunto de datos y sus variables graficando cada variable contra el precio.
 
 # In[ ]:
 
@@ -76,22 +76,22 @@ fig,ax=plt.subplots(1, 4, figsize=(12, 3), sharey=True)
 for i in range(len(ax)):
     ax[i].scatter(X_train[:,i],y_train)
     ax[i].set_xlabel(X_features[i])
-ax[0].set_ylabel("Price (1000's)")
+ax[0].set_ylabel("Precio (miles)")
 plt.show()
 
 
-# Plotting each feature vs. the target, price, provides some indication of which features have the strongest influence on price. Above, increasing size also increases price. Bedrooms and floors don't seem to have a strong impact on price. Newer houses have higher prices than older houses.
+# Graficar cada variable contra el objetivo, el precio, da una idea de qué variables influyen más en el precio. Arriba se ve que, a mayor tamaño, mayor precio. Las habitaciones y los pisos no parecen tener un gran efecto en el precio. Las casas más nuevas tienen precios más altos que las más viejas.
 
 # <a name="toc_15456_5"></a>
-# ## Gradient Descent With Multiple Variables
-# Here are the equations you developed in the last lab on gradient descent for multiple variables.:
+# ## Descenso de gradiente con múltiples variables
+# Estas son las ecuaciones que desarrollaste en el laboratorio anterior para el descenso de gradiente con múltiples variables:
 # 
-# $$\begin{align*} \text{repeat}&\text{ until convergence:} \; \lbrace \newline\;
-# & w_j := w_j -  \alpha \frac{\partial J(\mathbf{w},b)}{\partial w_j} \tag{1}  \; & \text{for j = 0..n-1}\newline
+# $$\begin{align*} \text{repetir}&\text{ hasta converger:} \; \lbrace \newline\;
+# & w_j := w_j -  \alpha \frac{\partial J(\mathbf{w},b)}{\partial w_j} \tag{1}  \; & \text{para j = 0..n-1}\newline
 # &b\ \ := b -  \alpha \frac{\partial J(\mathbf{w},b)}{\partial b}  \newline \rbrace
 # \end{align*}$$
 # 
-# where, n is the number of features, parameters $w_j$,  $b$, are updated simultaneously and where  
+# donde n es el número de variables, los parámetros $w_j$ y $b$ se actualizan simultáneamente, y donde  
 # 
 # $$
 # \begin{align}
@@ -99,30 +99,30 @@ plt.show()
 # \frac{\partial J(\mathbf{w},b)}{\partial b}  &= \frac{1}{m} \sum\limits_{i = 0}^{m-1} (f_{\mathbf{w},b}(\mathbf{x}^{(i)}) - y^{(i)}) \tag{3}
 # \end{align}
 # $$
-# * m is the number of training examples in the data set
+# * m es el número de ejemplos de entrenamiento del conjunto de datos
 # 
 #     
-# *  $f_{\mathbf{w},b}(\mathbf{x}^{(i)})$ is the model's prediction, while $y^{(i)}$ is the target value
+# * $f_{\mathbf{w},b}(\mathbf{x}^{(i)})$ es la predicción del modelo, mientras que $y^{(i)}$ es el valor objetivo
 # 
 
-# ## Learning Rate
+# ## Tasa de aprendizaje
 # <figure>
 #     <img src="./images/C1_W2_Lab06_learningrate.PNG" style="width:1200px;" >
 # </figure>
-# The lectures discussed some of the issues related to setting the learning rate $\alpha$. The learning rate controls the size of the update to the parameters. See equation (1) above. It is shared by all the parameters.  
+# En clase se discutieron algunos aspectos de cómo elegir la tasa de aprendizaje $\alpha$. La tasa de aprendizaje controla el tamaño de la actualización de los parámetros (ver la ecuación (1)) y es la misma para todos los parámetros.  
 # 
-# Let's run gradient descent and try a few settings of $\alpha$ on our data set
+# Ejecutemos el descenso de gradiente y probemos algunos valores de $\alpha$ con nuestros datos.
 
 # ### $\alpha$ = 9.9e-7
 
 # In[ ]:
 
 
-#set alpha to 9.9e-7
+#alpha = 9.9e-7
 _, _, hist = run_gradient_descent(X_train, y_train, 10, alpha = 9.9e-7)
 
 
-# It appears the learning rate is too high.  The solution does not converge. Cost is *increasing* rather than decreasing. Let's plot the result:
+# Parece que la tasa de aprendizaje es demasiado alta. La solución no converge: el costo *aumenta* en vez de disminuir. Grafiquemos el resultado:
 
 # In[ ]:
 
@@ -130,20 +130,20 @@ _, _, hist = run_gradient_descent(X_train, y_train, 10, alpha = 9.9e-7)
 plot_cost_i_w(X_train, y_train, hist)
 
 
-# The plot on the right shows the value of one of the parameters, $w_0$. At each iteration, it is overshooting the optimal value and as a result, cost ends up *increasing* rather than approaching the minimum. Note that this is not a completely accurate picture as there are 4 parameters being modified each pass rather than just one. This plot is only showing $w_0$ with the other parameters fixed at benign values. In this and later plots you may notice the blue and orange lines being slightly off.
+# La gráfica de la derecha muestra el valor de uno de los parámetros, $w_0$. En cada iteración se pasa del valor óptimo y, como resultado, el costo termina *aumentando* en lugar de acercarse al mínimo. Ten en cuenta que esta imagen no es del todo exacta, ya que en cada paso se modifican 4 parámetros y no solo uno. La gráfica muestra solo $w_0$, con los demás parámetros fijos en valores razonables. En esta y en las gráficas siguientes quizá notes que las líneas azul y naranja no coinciden del todo.
 
 # 
 # ### $\alpha$ = 9e-7
-# Let's try a bit smaller value and see what happens.
+# Probemos un valor un poco más pequeño y veamos qué pasa.
 
 # In[ ]:
 
 
-#set alpha to 9e-7
+#alpha = 9e-7
 _,_,hist = run_gradient_descent(X_train, y_train, 10, alpha = 9e-7)
 
 
-# Cost is decreasing throughout the run showing that alpha is not too large. 
+# El costo disminuye durante toda la ejecución, lo que indica que alfa no es demasiado grande. 
 
 # In[ ]:
 
@@ -151,20 +151,20 @@ _,_,hist = run_gradient_descent(X_train, y_train, 10, alpha = 9e-7)
 plot_cost_i_w(X_train, y_train, hist)
 
 
-# On the left, you see that cost is decreasing as it should. On the right, you can see that $w_0$ is still oscillating around the minimum, but the cost is decreasing with every iteration rather than increasing. Note above that `dj_dw[0]` changes sign with each iteration as `w[0]` jumps over the optimal value.
-# This alpha value will converge. You can vary the number of iterations to see how it behaves.
+# A la izquierda ves que el costo disminuye, como debe ser. A la derecha ves que $w_0$ todavía oscila alrededor del mínimo, pero el costo baja en cada iteración en lugar de subir. Observa que `dj_dw[0]` cambia de signo en cada iteración, porque `w[0]` salta por encima del valor óptimo.
+# Con este valor de alfa, la solución convergerá. Puedes variar el número de iteraciones para ver cómo se comporta.
 
 # ### $\alpha$ = 1e-7
-# Let's try a bit smaller value for $\alpha$ and see what happens.
+# Probemos un valor aún más pequeño de $\alpha$ y veamos qué pasa.
 
 # In[ ]:
 
 
-#set alpha to 1e-7
+#alpha = 1e-7
 _,_,hist = run_gradient_descent(X_train, y_train, 10, alpha = 1e-7)
 
 
-# Cost is decreasing throughout the run showing that $\alpha$ is not too large. 
+# El costo disminuye durante toda la ejecución, lo que indica que $\alpha$ no es demasiado grande. 
 
 # In[ ]:
 
@@ -172,60 +172,60 @@ _,_,hist = run_gradient_descent(X_train, y_train, 10, alpha = 1e-7)
 plot_cost_i_w(X_train,y_train,hist)
 
 
-# On the left, you see that cost is decreasing as it should. On the right, you can see that $w_0$ is approaching the minimum without oscillations. `dj_w0` is negative throughout the run. This solution will also converge.
+# A la izquierda ves que el costo disminuye, como debe ser. A la derecha ves que $w_0$ se acerca al mínimo sin oscilar. `dj_w0` es negativo durante toda la ejecución. Esta solución también convergerá.
 
-# ## Feature Scaling 
+# ## Escalado de variables 
 # <figure>
 #     <img src="./images/C1_W2_Lab06_featurescalingheader.PNG" style="width:1200px;" >
 # </figure>
-# The lectures described the importance of rescaling the dataset so the features have a similar range.
-# If you are interested in the details of why this is the case, click on the 'details' header below. If not, the section below will walk through an implementation of how to do feature scaling.
+# En clase se explicó la importancia de reescalar el conjunto de datos para que las variables tengan rangos similares.
+# Si te interesan los detalles de por qué es así, haz clic en el encabezado "Detalles". Si no, la sección siguiente muestra cómo implementar el escalado de variables.
 
 # <details>
 # <summary>
-#     <font size='3', color='darkgreen'><b>Details</b></font>
+#     <font size='3', color='darkgreen'><b>Detalles</b></font>
 # </summary>
 # 
-# Let's look again at the situation with $\alpha$ = 9e-7. This is pretty close to the maximum value we can set $\alpha$  to without diverging. This is a short run showing the first few iterations:
+# Volvamos a la situación con $\alpha$ = 9e-7. Este valor está muy cerca del máximo que podemos usar para $\alpha$ sin que diverja. Esta es una ejecución corta con las primeras iteraciones:
 # 
 # <figure>
 #     <img src="./images/C1_W2_Lab06_ShortRun.PNG" style="width:1200px;" >
 # </figure>
 # 
-# Above, while cost is being decreased, its clear that $w_0$ is making more rapid progress than the other parameters due to its much larger gradient.
+# Aunque el costo disminuye, es claro que $w_0$ avanza más rápido que los demás parámetros, porque su gradiente es mucho mayor.
 # 
-# The graphic below shows the result of a very long run with $\alpha$ = 9e-7. This takes several hours.
+# La siguiente imagen muestra el resultado de una ejecución muy larga con $\alpha$ = 9e-7, que tarda varias horas.
 # 
 # <figure>
 #     <img src="./images/C1_W2_Lab06_LongRun.PNG" style="width:1200px;" >
 # </figure>
 #     
-# Above, you can see cost decreased slowly after its initial reduction. Notice the difference between `w0` and `w1`,`w2`,`w3` as well as  `dj_dw0` and `dj_dw1-3`. `w0` reaches its near final value very quickly and `dj_dw0` has quickly decreased to a small value showing that `w0` is near the final value. The other parameters were reduced much more slowly.
+# Puedes ver que, tras la reducción inicial, el costo disminuye lentamente. Observa la diferencia entre `w0` y `w1`,`w2`,`w3`, y entre `dj_dw0` y `dj_dw1-3`. `w0` llega muy rápido a un valor cercano al final, y `dj_dw0` baja rápidamente a un valor pequeño, lo que indica que `w0` está cerca de su valor final. Los demás parámetros se reducen mucho más lento.
 # 
-# Why is this?  Is there something we can improve? See below:
+# ¿Por qué pasa esto? ¿Podemos mejorar algo? Mira abajo:
 # <figure>
 #     <center> <img src="./images/C1_W2_Lab06_scale.PNG"   ></center>
 # </figure>   
 # 
-# The figure above shows why $w$'s are updated unevenly. 
-# - $\alpha$ is shared by all parameter updates ($w$'s and $b$).
-# - the common error term is multiplied by the features for the $w$'s. (not $b$).
-# - the features vary significantly in magnitude making some features update much faster than others. In this case, $w_0$ is multiplied by 'size(sqft)', which is generally > 1000,  while $w_1$ is multiplied by 'number of bedrooms', which is generally 2-4. 
+# La figura muestra por qué los $w$ se actualizan de forma desigual. 
+# - $\alpha$ es la misma para todas las actualizaciones de parámetros ($w$ y $b$).
+# - El término de error común se multiplica por las variables en el caso de los $w$ (no de $b$).
+# - Las variables tienen magnitudes muy distintas, lo que hace que algunas se actualicen mucho más rápido que otras. En este caso, $w_0$ se multiplica por "tamaño (pies²)", que suele ser > 1000, mientras que $w_1$ se multiplica por "número de habitaciones", que suele estar entre 2 y 4. 
 #     
-# The solution is Feature Scaling.
+# La solución es el escalado de variables.
 
-# The lectures discussed three different techniques: 
-# - Feature scaling, essentially dividing each positive feature by its maximum value, or more generally, rescale each feature by both its minimum and maximum values using (x-min)/(max-min). Both ways normalizes features to the range of -1 and 1, where the former method works for positive features which is simple and serves well for the lecture's example, and the latter method works for any features.
-# - Mean normalization: $x_i := \dfrac{x_i - \mu_i}{max - min} $ 
-# - Z-score normalization which we will explore below. 
+# En clase se discutieron tres técnicas distintas: 
+# - Escalado de variables: básicamente, dividir cada variable positiva entre su valor máximo o, de forma más general, reescalar cada variable usando su mínimo y su máximo con (x-min)/(max-min). La primera forma sirve para variables positivas, es simple y funciona bien para el ejemplo de clase; la segunda funciona para cualquier variable. En ambos casos, los valores quedan entre 0 y 1.
+# - Normalización por la media: $x_i := \dfrac{x_i - \mu_i}{max - min} $ 
+# - Normalización z-score, que exploraremos a continuación. 
 
 # 
-# ### z-score normalization 
-# After z-score normalization, all features will have a mean of 0 and a standard deviation of 1.
+# ### Normalización z-score 
+# Después de la normalización z-score, todas las variables tienen media 0 y desviación estándar 1.
 # 
-# To implement z-score normalization, adjust your input values as shown in this formula:
+# Para implementar la normalización z-score, ajusta los valores de entrada con esta fórmula:
 # $$x^{(i)}_j = \dfrac{x^{(i)}_j - \mu_j}{\sigma_j} \tag{4}$$ 
-# where $j$ selects a feature or a column in the $\mathbf{X}$ matrix. $µ_j$ is the mean of all the values for feature (j) and $\sigma_j$ is the standard deviation of feature (j).
+# donde $j$ selecciona una variable, es decir, una columna de la matriz $\mathbf{X}$. $µ_j$ es la media de todos los valores de la variable (j) y $\sigma_j$ es su desviación estándar.
 # $$
 # \begin{align}
 # \mu_j &= \frac{1}{m} \sum_{i=0}^{m-1} x^{(i)}_j \tag{5}\\
@@ -233,45 +233,45 @@ plot_cost_i_w(X_train,y_train,hist)
 # \end{align}
 # $$
 # 
-# >**Implementation Note:** When normalizing the features, it is important
-# to store the values used for normalization - the mean value and the standard deviation used for the computations. After learning the parameters
-# from the model, we often want to predict the prices of houses we have not
-# seen before. Given a new x value (living room area and number of bed-
-# rooms), we must first normalize x using the mean and standard deviation
-# that we had previously computed from the training set.
+# >**Nota de implementación:** Al normalizar las variables, es importante
+# guardar los valores usados en la normalización: la media y la desviación estándar. Después de aprender los parámetros
+# del modelo, a menudo queremos predecir el precio de casas que no hemos
+# visto antes. Dado un nuevo valor de x (por ejemplo, el área y el número de
+# habitaciones), primero debemos normalizarlo con la media y la desviación estándar
+# que calculamos a partir del conjunto de entrenamiento.
 # 
-# **Implementation**
+# **Implementación**
 
 # In[ ]:
 
 
 def zscore_normalize_features(X):
     """
-    computes  X, zcore normalized by column
+    calcula X normalizado por columna con z-score
     
     Args:
-      X (ndarray (m,n))     : input data, m examples, n features
+      X (ndarray (m,n))     : datos de entrada, m ejemplos, n variables
       
     Returns:
-      X_norm (ndarray (m,n)): input normalized by column
-      mu (ndarray (n,))     : mean of each feature
-      sigma (ndarray (n,))  : standard deviation of each feature
+      X_norm (ndarray (m,n)): entrada normalizada por columna
+      mu (ndarray (n,))     : media de cada variable
+      sigma (ndarray (n,))  : desviación estándar de cada variable
     """
-    # find the mean of each column/feature
-    mu     = np.mean(X, axis=0)                 # mu will have shape (n,)
-    # find the standard deviation of each column/feature
-    sigma  = np.std(X, axis=0)                  # sigma will have shape (n,)
-    # element-wise, subtract mu for that column from each example, divide by std for that column
+    # calcular la media de cada columna/variable
+    mu     = np.mean(X, axis=0)                 # mu tendrá forma (n,)
+    # calcular la desviación estándar de cada columna/variable
+    sigma  = np.std(X, axis=0)                  # sigma tendrá forma (n,)
+    # elemento a elemento: restar a cada ejemplo la media de su columna y dividir entre la desviación estándar de esa columna
     X_norm = (X - mu) / sigma      
 
     return (X_norm, mu, sigma)
  
-#check our work
+#verificar nuestro trabajo
 #from sklearn.preprocessing import scale
 #scale(X_orig, axis=0, with_mean=True, with_std=True, copy=True)
 
 
-# Let's look at the steps involved in Z-score normalization. The plot below shows the transformation step by step.
+# Veamos los pasos de la normalización z-score. La gráfica de abajo muestra la transformación paso a paso.
 
 # In[ ]:
 
@@ -284,7 +284,7 @@ X_norm = (X_train - mu)/sigma
 fig,ax=plt.subplots(1, 3, figsize=(12, 3))
 ax[0].scatter(X_train[:,0], X_train[:,1])
 ax[0].set_xlabel(X_features[0]); ax[0].set_ylabel(X_features[1]);
-ax[0].set_title("unnormalized")
+ax[0].set_title("sin normalizar")
 ax[0].axis('equal')
 
 ax[1].scatter(X_mean[:,0], X_mean[:,1])
@@ -294,31 +294,31 @@ ax[1].axis('equal')
 
 ax[2].scatter(X_norm[:,0], X_norm[:,1])
 ax[2].set_xlabel(X_features[0]); ax[0].set_ylabel(X_features[1]);
-ax[2].set_title(r"Z-score normalized")
+ax[2].set_title(r"normalizado con z-score")
 ax[2].axis('equal')
 plt.tight_layout(rect=[0, 0.03, 1, 0.95])
-fig.suptitle("distribution of features before, during, after normalization")
+fig.suptitle("distribución de las variables antes, durante y después de normalizar")
 plt.show()
 
 
-# The plot above shows the relationship between two of the training set parameters, "age" and "size(sqft)". *These are plotted with equal scale*. 
-# - Left: Unnormalized: The range of values or the variance of the 'size(sqft)' feature is much larger than that of age
-# - Middle: The first step removes the mean or average value from each feature. This leaves features that are centered around zero. It's difficult to see the difference for the 'age' feature, but 'size(sqft)' is clearly around zero.
-# - Right: The second step divides by the standard deviation. This leaves both features centered at zero with a similar scale.
+# La gráfica muestra la relación entre dos variables del conjunto de entrenamiento, "habitaciones" y "tamaño (pies²)". *Están graficadas con la misma escala*. 
+# - Izquierda: sin normalizar. El rango de valores, o la varianza, de "tamaño (pies²)" es mucho mayor que el de las habitaciones.
+# - Centro: el primer paso le resta a cada variable su media. Así las variables quedan centradas en cero. Es difícil ver la diferencia en las habitaciones, pero "tamaño (pies²)" ahora está claramente alrededor de cero.
+# - Derecha: el segundo paso divide entre la desviación estándar. Así ambas variables quedan centradas en cero y con una escala similar.
 
-# Let's normalize the data and compare it to the original data.
+# Normalicemos los datos y comparémoslos con los originales.
 
 # In[ ]:
 
 
-# normalize the original features
+# normalizar las variables originales
 X_norm, X_mu, X_sigma = zscore_normalize_features(X_train)
 print(f"X_mu = {X_mu}, \nX_sigma = {X_sigma}")
-print(f"Peak to Peak range by column in Raw        X:{np.ptp(X_train,axis=0)}")   
-print(f"Peak to Peak range by column in Normalized X:{np.ptp(X_norm,axis=0)}")
+print(f"Rango (máx - mín) por columna en X original:    {np.ptp(X_train,axis=0)}")   
+print(f"Rango (máx - mín) por columna en X normalizado: {np.ptp(X_norm,axis=0)}")
 
 
-# The peak to peak range of each column is reduced from a factor of thousands to a factor of 2-3 by normalization.
+# Con la normalización, el rango (máx - mín) de cada columna pasa de estar en el orden de miles a estar entre 2 y 3.
 
 # In[ ]:
 
@@ -327,23 +327,23 @@ fig,ax=plt.subplots(1, 4, figsize=(12, 3))
 for i in range(len(ax)):
     norm_plot(ax[i],X_train[:,i],)
     ax[i].set_xlabel(X_features[i])
-ax[0].set_ylabel("count");
-fig.suptitle("distribution of features before normalization")
+ax[0].set_ylabel("frecuencia");
+fig.suptitle("distribución de las variables antes de normalizar")
 plt.show()
 fig,ax=plt.subplots(1,4,figsize=(12,3))
 for i in range(len(ax)):
     norm_plot(ax[i],X_norm[:,i],)
     ax[i].set_xlabel(X_features[i])
-ax[0].set_ylabel("count"); 
-fig.suptitle("distribution of features after normalization")
+ax[0].set_ylabel("frecuencia"); 
+fig.suptitle("distribución de las variables después de normalizar")
 
 plt.show()
 
 
-# Notice, above, the range of the normalized data (x-axis) is centered around zero and roughly +/- 2. Most importantly, the range is similar for each feature.
+# Observa que el rango de los datos normalizados (eje x) está centrado en cero y va aproximadamente de -2 a +2. Lo más importante es que el rango es similar para todas las variables.
 
-# Let's re-run our gradient descent algorithm with normalized data.
-# Note the **vastly larger value of alpha**. This will speed up gradient descent.
+# Volvamos a ejecutar el descenso de gradiente con los datos normalizados.
+# Observa el **valor de alfa, muchísimo más grande**. Esto acelera el descenso de gradiente.
 
 # In[ ]:
 
@@ -351,51 +351,51 @@ plt.show()
 w_norm, b_norm, hist = run_gradient_descent(X_norm, y_train, 1000, 1.0e-1, )
 
 
-# The scaled features get very accurate results **much, much faster!**. Notice the gradient of each parameter is tiny by the end of this fairly short run. A learning rate of 0.1 is a good start for regression with normalized features.
-# Let's plot our predictions versus the target values. Note, the prediction is made using the normalized feature while the plot is shown using the original feature values.
+# ¡Con las variables escaladas se obtienen resultados muy precisos **muchísimo más rápido**! Observa que, al final de esta ejecución bastante corta, el gradiente de cada parámetro es diminuto. Una tasa de aprendizaje de 0.1 es un buen punto de partida para regresión con variables normalizadas.
+# Grafiquemos nuestras predicciones contra los valores objetivo. Ten en cuenta que la predicción se hace con las variables normalizadas, pero la gráfica usa los valores originales.
 
 # In[ ]:
 
 
-#predict target using normalized features
+#predecir el objetivo usando las variables normalizadas
 m = X_norm.shape[0]
 yp = np.zeros(m)
 for i in range(m):
     yp[i] = np.dot(X_norm[i], w_norm) + b_norm
 
-    # plot predictions and targets versus original features    
+    # graficar predicciones y objetivos contra las variables originales    
 fig,ax=plt.subplots(1,4,figsize=(12, 3),sharey=True)
 for i in range(len(ax)):
-    ax[i].scatter(X_train[:,i],y_train, label = 'target')
+    ax[i].scatter(X_train[:,i],y_train, label = 'objetivo')
     ax[i].set_xlabel(X_features[i])
-    ax[i].scatter(X_train[:,i],yp,color=dlc["dlorange"], label = 'predict')
-ax[0].set_ylabel("Price"); ax[0].legend();
-fig.suptitle("target versus prediction using z-score normalized model")
+    ax[i].scatter(X_train[:,i],yp,color=dlc["dlorange"], label = 'predicción')
+ax[0].set_ylabel("Precio"); ax[0].legend();
+fig.suptitle("objetivo vs. predicción con el modelo normalizado con z-score")
 plt.show()
 
 
-# The results look good. A few points to note:
-# - with multiple features, we can no longer have a single plot showing results versus features.
-# - when generating the plot, the normalized features were used. Any predictions using the parameters learned from a normalized training set must also be normalized.
+# Los resultados se ven bien. Algunos puntos a notar:
+# - Con múltiples variables, ya no podemos tener una sola gráfica que muestre los resultados contra las variables.
+# - Para generar la gráfica se usaron las variables normalizadas. Cualquier predicción que use parámetros aprendidos de un conjunto de entrenamiento normalizado también debe usar datos normalizados.
 
-# **Prediction**
-# The point of generating our model is to use it to predict housing prices that are not in the data set. Let's predict the price of a house with 1200 sqft, 3 bedrooms, 1 floor, 40 years old. Recall, that you must normalize the data with the mean and standard deviation derived when the training data was normalized. 
+# **Predicción**
+# El propósito de construir el modelo es usarlo para predecir precios de viviendas que no están en el conjunto de datos. Vamos a predecir el precio de una casa de 1200 pies², 3 habitaciones, 1 piso y 40 años de antigüedad. Recuerda que debes normalizar los datos con la media y la desviación estándar obtenidas al normalizar los datos de entrenamiento. 
 
 # In[ ]:
 
 
-# First, normalize out example.
+# Primero, normalizar nuestro ejemplo.
 x_house = np.array([1200, 3, 1, 40])
 x_house_norm = (x_house - X_mu) / X_sigma
 print(x_house_norm)
 x_house_predict = np.dot(x_house_norm, w_norm) + b_norm
-print(f" predicted price of a house with 1200 sqft, 3 bedrooms, 1 floor, 40 years old = ${x_house_predict*1000:0.0f}")
+print(f" precio estimado de una casa de 1200 pies², 3 habitaciones, 1 piso y 40 años de antigüedad = ${x_house_predict*1000:0.0f}")
 
 
-# **Cost Contours**  
-# <img align="left" src="./images/C1_W2_Lab06_contours.PNG"   style="width:240px;" >Another way to view feature scaling is in terms of the cost contours. When feature scales do not match, the plot of cost versus parameters in a contour plot is asymmetric. 
+# **Contornos del costo**  
+# <img align="left" src="./images/C1_W2_Lab06_contours.PNG"   style="width:240px;" >Otra forma de ver el escalado de variables es a través de los contornos del costo. Cuando las escalas de las variables no coinciden, el gráfico de contorno del costo en función de los parámetros es asimétrico. 
 # 
-# In the plot below, the scale of the parameters is matched. The left plot is the cost contour plot of w[0], the square feet versus w[1], the number of bedrooms before normalizing the features. The plot is so asymmetric, the curves completing the contours are not visible. In contrast, when the features are normalized, the cost contour is much more symmetric. The result is that updates to parameters during gradient descent can make equal progress for each parameter. 
+# En la gráfica de abajo, la escala de los parámetros está igualada. La gráfica de la izquierda es el contorno del costo de w[0] (pies²) contra w[1] (número de habitaciones) antes de normalizar las variables. Es tan asimétrica que no se alcanzan a ver las curvas que cierran los contornos. En cambio, cuando las variables están normalizadas, el contorno del costo es mucho más simétrico. Como resultado, durante el descenso de gradiente cada parámetro puede avanzar al mismo ritmo. 
 # 
 
 # In[ ]:
@@ -405,11 +405,11 @@ plt_equal_scale(X_train, X_norm, y_train)
 
 
 # 
-# ## Congratulations!
-# In this lab you:
-# - utilized the routines for linear regression with multiple features you developed in previous labs
-# - explored the impact of the learning rate  $\alpha$ on convergence 
-# - discovered the value of feature scaling using z-score normalization in speeding convergence
+# ## ¡Felicidades!
+# En este laboratorio:
+# - Usaste las funciones de regresión lineal con múltiples variables que desarrollaste en laboratorios anteriores.
+# - Exploraste el efecto de la tasa de aprendizaje $\alpha$ en la convergencia.
+# - Descubriste el valor del escalado de variables con normalización z-score para acelerar la convergencia.
 
-# ## Acknowledgments
-# The housing data was derived from the [Ames Housing dataset](http://jse.amstat.org/v19n3/decock.pdf) compiled by Dean De Cock for use in data science education.
+# ## Agradecimientos
+# Los datos de viviendas provienen del [conjunto de datos Ames Housing](http://jse.amstat.org/v19n3/decock.pdf), recopilado por Dean De Cock para su uso en la enseñanza de ciencia de datos.
