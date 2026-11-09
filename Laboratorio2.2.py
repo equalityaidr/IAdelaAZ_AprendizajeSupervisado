@@ -1,38 +1,38 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# # Optional Lab: Multiple Variable Linear Regression
+# # Laboratorio opcional: Regresión lineal con múltiples variables
 # 
-# In this lab, you will extend the data structures and previously developed routines to support multiple features. Several routines are updated making the lab appear lengthy, but it makes minor adjustments to previous routines making it quick to review.
-# # Outline
-# - [&nbsp;&nbsp;1.1 Goals](#toc_15456_1.1)
-# - [&nbsp;&nbsp;1.2 Tools](#toc_15456_1.2)
-# - [&nbsp;&nbsp;1.3 Notation](#toc_15456_1.3)
-# - [2 Problem Statement](#toc_15456_2)
-# - [&nbsp;&nbsp;2.1 Matrix X containing our examples](#toc_15456_2.1)
-# - [&nbsp;&nbsp;2.2 Parameter vector w, b](#toc_15456_2.2)
-# - [3 Model Prediction With Multiple Variables](#toc_15456_3)
-# - [&nbsp;&nbsp;3.1 Single Prediction element by element](#toc_15456_3.1)
-# - [&nbsp;&nbsp;3.2 Single Prediction, vector](#toc_15456_3.2)
-# - [4 Compute Cost With Multiple Variables](#toc_15456_4)
-# - [5 Gradient Descent With Multiple Variables](#toc_15456_5)
-# - [&nbsp;&nbsp;5.1 Compute Gradient with Multiple Variables](#toc_15456_5.1)
-# - [&nbsp;&nbsp;5.2 Gradient Descent With Multiple Variables](#toc_15456_5.2)
-# - [6 Congratulations](#toc_15456_6)
+# En este laboratorio vas a ampliar las estructuras de datos y las funciones desarrolladas antes para que admitan múltiples variables de entrada (features). Se actualizan varias funciones, lo que hace que el laboratorio parezca largo, pero los cambios sobre las versiones anteriores son pequeños y se revisan rápido.
+# # Contenido
+# - [&nbsp;&nbsp;1.1 Objetivos](#toc_15456_1.1)
+# - [&nbsp;&nbsp;1.2 Herramientas](#toc_15456_1.2)
+# - [&nbsp;&nbsp;1.3 Notación](#toc_15456_1.3)
+# - [2 Planteamiento del problema](#toc_15456_2)
+# - [&nbsp;&nbsp;2.1 Matriz X con nuestros ejemplos](#toc_15456_2.1)
+# - [&nbsp;&nbsp;2.2 Vector de parámetros w, b](#toc_15456_2.2)
+# - [3 Predicción del modelo con múltiples variables](#toc_15456_3)
+# - [&nbsp;&nbsp;3.1 Predicción individual, elemento a elemento](#toc_15456_3.1)
+# - [&nbsp;&nbsp;3.2 Predicción individual, vectorizada](#toc_15456_3.2)
+# - [4 Cálculo del costo con múltiples variables](#toc_15456_4)
+# - [5 Descenso de gradiente con múltiples variables](#toc_15456_5)
+# - [&nbsp;&nbsp;5.1 Cálculo del gradiente con múltiples variables](#toc_15456_5.1)
+# - [&nbsp;&nbsp;5.2 Descenso de gradiente con múltiples variables](#toc_15456_5.2)
+# - [6 ¡Felicidades!](#toc_15456_6)
 # 
 
 # <a name="toc_15456_1.1"></a>
-# ## 1.1 Goals
-# - Extend our regression model  routines to support multiple features
-#     - Extend data structures to support multiple features
-#     - Rewrite prediction, cost and gradient routines to support multiple features
-#     - Utilize NumPy `np.dot` to vectorize their implementations for speed and simplicity
+# ## 1.1 Objetivos
+# - Ampliar las funciones de nuestro modelo de regresión para que admitan múltiples variables
+#     - Ampliar las estructuras de datos para admitir múltiples variables
+#     - Reescribir las funciones de predicción, costo y gradiente para admitir múltiples variables
+#     - Usar `np.dot` de NumPy para vectorizar las implementaciones y hacerlas más rápidas y simples
 
 # <a name="toc_15456_1.2"></a>
-# ## 1.2 Tools
-# In this lab, we will make use of: 
-# - NumPy, a popular library for scientific computing
-# - Matplotlib, a popular library for plotting data
+# ## 1.2 Herramientas
+# En este laboratorio usaremos: 
+# - NumPy, una librería popular de computación científica
+# - Matplotlib, una librería popular de visualización de datos
 
 # In[ ]:
 
@@ -41,43 +41,43 @@ import copy, math
 import numpy as np
 import matplotlib.pyplot as plt
 #plt.style.use('./deeplearning.mplstyle')
-np.set_printoptions(precision=2)  # reduced display precision on numpy arrays
+np.set_printoptions(precision=2)  # reduce la precisión con que se muestran los arrays de numpy
 
 
 # <a name="toc_15456_1.3"></a>
-# ## 1.3 Notation
-# Here is a summary of some of the notation you will encounter, updated for multiple features.  
+# ## 1.3 Notación
+# Aquí tienes un resumen de la notación que encontrarás, actualizada para múltiples variables.  
 # 
-# |General <img width=70/> <br />  Notation  <img width=70/> | Description<img width=350/>| Python (if applicable) |
+# |General <img width=70/> <br />  Notación  <img width=70/> | Descripción<img width=350/>| Python (si aplica) |
 # |: ------------|: ------------------------------------------------------------||
-# | $a$ | scalar, non bold                                                      ||
-# | $\mathbf{a}$ | vector, bold                                                 ||
-# | $\mathbf{A}$ | matrix, bold capital                                         ||
-# | **Regression** |         |    |     |
-# |  $\mathbf{X}$ | training example matrix                  | `X_train` |   
-# |  $\mathbf{y}$  | training example  targets                | `y_train` 
-# |  $\mathbf{x}^{(i)}$, $y^{(i)}$ | $i_{th}$Training Example | `X[i]`, `y[i]`|
-# | m | number of training examples | `m`|
-# | n | number of features in each example | `n`|
-# |  $\mathbf{w}$  |  parameter: weight,                       | `w`    |
-# |  $b$           |  parameter: bias                                           | `b`    |     
-# | $f_{\mathbf{w},b}(\mathbf{x}^{(i)})$ | The result of the model evaluation at $\mathbf{x^{(i)}}$ parameterized by $\mathbf{w},b$: $f_{\mathbf{w},b}(\mathbf{x}^{(i)}) = \mathbf{w} \cdot \mathbf{x}^{(i)}+b$  | `f_wb` | 
+# | $a$ | escalar, sin negrita                                                      ||
+# | $\mathbf{a}$ | vector, en negrita                                                 ||
+# | $\mathbf{A}$ | matriz, mayúscula en negrita                                         ||
+# | **Regresión** |         |    |     |
+# |  $\mathbf{X}$ | matriz de ejemplos de entrenamiento                  | `X_train` |   
+# |  $\mathbf{y}$  | valores objetivo de los ejemplos de entrenamiento                | `y_train` 
+# |  $\mathbf{x}^{(i)}$, $y^{(i)}$ | $i$-ésimo ejemplo de entrenamiento | `X[i]`, `y[i]`|
+# | m | número de ejemplos de entrenamiento | `m`|
+# | n | número de variables en cada ejemplo | `n`|
+# |  $\mathbf{w}$  |  parámetro: pesos                       | `w`    |
+# |  $b$           |  parámetro: sesgo                                           | `b`    |     
+# | $f_{\mathbf{w},b}(\mathbf{x}^{(i)})$ | Resultado de evaluar el modelo en $\mathbf{x^{(i)}}$, parametrizado por $\mathbf{w},b$: $f_{\mathbf{w},b}(\mathbf{x}^{(i)}) = \mathbf{w} \cdot \mathbf{x}^{(i)}+b$  | `f_wb` | 
 # 
 
 # <a name="toc_15456_2"></a>
-# # 2 Problem Statement
+# # 2 Planteamiento del problema
 # 
-# You will use the motivating example of housing price prediction. The training dataset contains three examples with four features (size, bedrooms, floors and, age) shown in the table below.  Note that, unlike the earlier labs, size is in sqft rather than 1000 sqft. This causes an issue, which you will solve in the next lab!
+# Usarás el ejemplo de predicción del precio de viviendas. El conjunto de entrenamiento tiene tres ejemplos con cuatro variables (tamaño, habitaciones, pisos y antigüedad), como se muestra en la tabla. Observa que, a diferencia de los laboratorios anteriores, el tamaño está en pies² y no en miles de pies². Esto causa un problema, ¡que resolverás en el próximo laboratorio!
 # 
-# | Size (sqft) | Number of Bedrooms  | Number of floors | Age of  Home | Price (1000s dollars)  |   
+# | Tamaño (pies²) | Número de habitaciones  | Número de pisos | Antigüedad de la casa | Precio (miles de dólares)  |   
 # | ----------------| ------------------- |----------------- |--------------|-------------- |  
 # | 2104            | 5                   | 1                | 45           | 460           |  
 # | 1416            | 3                   | 2                | 40           | 232           |  
 # | 852             | 2                   | 1                | 35           | 178           |  
 # 
-# You will build a linear regression model using these values so you can then predict the price for other houses. For example, a house with 1200 sqft, 3 bedrooms, 1 floor, 40 years old.  
+# Vas a construir un modelo de regresión lineal con estos valores para luego predecir el precio de otras casas; por ejemplo, una casa de 1200 pies², 3 habitaciones, 1 piso y 40 años de antigüedad.  
 # 
-# Please run the following code cell to create your `X_train` and `y_train` variables.
+# Ejecuta la siguiente celda de código para crear tus variables `X_train` y `y_train`.
 
 # In[ ]:
 
@@ -87,8 +87,8 @@ y_train = np.array([460, 232, 178])
 
 
 # <a name="toc_15456_2.1"></a>
-# ## 2.1 Matrix X containing our examples
-# Similar to the table above, examples are stored in a NumPy matrix `X_train`. Each row of the matrix represents one example. When you have $m$ training examples ( $m$ is three in our example), and there are $n$ features (four in our example), $\mathbf{X}$ is a matrix with dimensions ($m$, $n$) (m rows, n columns).
+# ## 2.1 Matriz X con nuestros ejemplos
+# Igual que en la tabla, los ejemplos se guardan en una matriz de NumPy, `X_train`. Cada fila de la matriz representa un ejemplo. Cuando tienes $m$ ejemplos de entrenamiento ($m$ es tres en nuestro caso) y $n$ variables (cuatro en nuestro caso), $\mathbf{X}$ es una matriz de dimensiones ($m$, $n$) (m filas, n columnas).
 # 
 # 
 # $$\mathbf{X} = 
@@ -99,29 +99,29 @@ y_train = np.array([460, 232, 178])
 #  x^{(m-1)}_0 & x^{(m-1)}_1 & \cdots & x^{(m-1)}_{n-1} 
 # \end{pmatrix}
 # $$
-# notation:
-# - $\mathbf{x}^{(i)}$ is vector containing example i. $\mathbf{x}^{(i)}$ $ = (x^{(i)}_0, x^{(i)}_1, \cdots,x^{(i)}_{n-1})$
-# - $x^{(i)}_j$ is element j in example i. The superscript in parenthesis indicates the example number while the subscript represents an element.  
+# notación:
+# - $\mathbf{x}^{(i)}$ es el vector que contiene el ejemplo i. $\mathbf{x}^{(i)}$ $ = (x^{(i)}_0, x^{(i)}_1, \cdots,x^{(i)}_{n-1})$
+# - $x^{(i)}_j$ es el elemento j del ejemplo i. El superíndice entre paréntesis indica el número de ejemplo, mientras que el subíndice indica el elemento.  
 # 
-# Display the input data.
+# Muestra los datos de entrada.
 
 # In[ ]:
 
 
-# data is stored in numpy array/matrix
-print(f"X Shape: {X_train.shape}, X Type:{type(X_train)})")
+# los datos se guardan en un array/matriz de numpy
+print(f"Forma de X: {X_train.shape}, Tipo de X: {type(X_train)}")
 print(X_train)
-print(f"y Shape: {y_train.shape}, y Type:{type(y_train)})")
+print(f"Forma de y: {y_train.shape}, Tipo de y: {type(y_train)}")
 print(y_train)
 
 
 # <a name="toc_15456_2.2"></a>
-# ## 2.2 Parameter vector w, b
+# ## 2.2 Vector de parámetros w, b
 # 
-# * $\mathbf{w}$ is a vector with $n$ elements.
-#   - Each element contains the parameter associated with one feature.
-#   - in our dataset, n is 4.
-#   - notionally, we draw this as a column vector
+# * $\mathbf{w}$ es un vector con $n$ elementos.
+#   - Cada elemento contiene el parámetro asociado a una variable.
+#   - En nuestro conjunto de datos, n es 4.
+#   - Conceptualmente, lo representamos como un vector columna
 # 
 # $$\mathbf{w} = \begin{pmatrix}
 # w_0 \\ 
@@ -130,32 +130,32 @@ print(y_train)
 # w_{n-1}
 # \end{pmatrix}
 # $$
-# * $b$ is a scalar parameter.  
+# * $b$ es un parámetro escalar.  
 
-# For demonstration, $\mathbf{w}$ and $b$ will be loaded with some initial selected values that are near the optimal. $\mathbf{w}$ is a 1-D NumPy vector.
+# Para la demostración, $\mathbf{w}$ y $b$ se cargarán con valores iniciales cercanos a los óptimos. $\mathbf{w}$ es un vector 1-D de NumPy.
 
 # In[ ]:
 
 
 b_init = 785.1811367994083
 w_init = np.array([ 0.39133535, 18.75376741, -53.36032453, -26.42131618])
-print(f"w_init shape: {w_init.shape}, b_init type: {type(b_init)}")
+print(f"Forma de w_init: {w_init.shape}, tipo de b_init: {type(b_init)}")
 
 
 # <a name="toc_15456_3"></a>
-# # 3 Model Prediction With Multiple Variables
-# The model's prediction with multiple variables is given by the linear model:
+# # 3 Predicción del modelo con múltiples variables
+# La predicción del modelo con múltiples variables está dada por el modelo lineal:
 # 
 # $$ f_{\mathbf{w},b}(\mathbf{x}) =  w_0x_0 + w_1x_1 +... + w_{n-1}x_{n-1} + b \tag{1}$$
-# or in vector notation:
+# o, en notación vectorial:
 # $$ f_{\mathbf{w},b}(\mathbf{x}) = \mathbf{w} \cdot \mathbf{x} + b  \tag{2} $$ 
-# where $\cdot$ is a vector `dot product`
+# donde $\cdot$ es el `producto punto` entre vectores
 # 
-# To demonstrate the dot product, we will implement prediction using (1) and (2).
+# Para mostrar el producto punto, implementaremos la predicción usando (1) y (2).
 
 # <a name="toc_15456_3.1"></a>
-# ## 3.1 Single Prediction element by element
-# Our previous prediction multiplied one feature value by one parameter and added a bias parameter. A direct extension of our previous implementation of prediction to multiple features would be to implement (1) above using loop over each element, performing the multiply with its parameter and then adding the bias parameter at the end.
+# ## 3.1 Predicción individual, elemento a elemento
+# Nuestra predicción anterior multiplicaba el valor de una variable por un parámetro y le sumaba el sesgo. Extender esa implementación a múltiples variables de forma directa significa implementar (1) con un ciclo que recorra cada elemento, lo multiplique por su parámetro y, al final, sume el sesgo.
 # 
 
 # In[ ]:
@@ -163,15 +163,15 @@ print(f"w_init shape: {w_init.shape}, b_init type: {type(b_init)}")
 
 def predict_single_loop(x, w, b): 
     """
-    single predict using linear regression
+    predicción individual con regresión lineal
     
     Args:
-      x (ndarray): Shape (n,) example with multiple features
-      w (ndarray): Shape (n,) model parameters    
-      b (scalar):  model parameter     
+      x (ndarray): Forma (n,), ejemplo con múltiples variables
+      w (ndarray): Forma (n,), parámetros del modelo    
+      b (scalar):  parámetro del modelo     
       
     Returns:
-      p (scalar):  prediction
+      p (scalar):  predicción
     """
     n = x.shape[0]
     p = 0
@@ -185,37 +185,37 @@ def predict_single_loop(x, w, b):
 # In[ ]:
 
 
-# get a row from our training data
+# tomar una fila de los datos de entrenamiento
 x_vec = X_train[0,:]
-print(f"x_vec shape {x_vec.shape}, x_vec value: {x_vec}")
+print(f"Forma de x_vec: {x_vec.shape}, valor de x_vec: {x_vec}")
 
-# make a prediction
+# hacer una predicción
 f_wb = predict_single_loop(x_vec, w_init, b_init)
-print(f"f_wb shape {f_wb.shape}, prediction: {f_wb}")
+print(f"Forma de f_wb: {f_wb.shape}, predicción: {f_wb}")
 
 
-# Note the shape of `x_vec`. It is a 1-D NumPy vector with 4 elements, (4,). The result, `f_wb` is a scalar.
+# Observa la forma de `x_vec`: es un vector 1-D de NumPy con 4 elementos, (4,). El resultado, `f_wb`, es un escalar.
 
 # <a name="toc_15456_3.2"></a>
-# ## 3.2 Single Prediction, vector
+# ## 3.2 Predicción individual, vectorizada
 # 
-# Noting that equation (1) above can be implemented using the dot product as in (2) above. We can make use of vector operations to speed up predictions.
+# La ecuación (1) se puede implementar con el producto punto, como en (2). Así podemos usar operaciones vectoriales para acelerar las predicciones.
 # 
-# Recall from the Python/Numpy lab that NumPy `np.dot()`[[link](https://numpy.org/doc/stable/reference/generated/numpy.dot.html)] can be used to perform a vector dot product. 
+# Recuerda del laboratorio de Python/NumPy que `np.dot()` [[enlace](https://numpy.org/doc/stable/reference/generated/numpy.dot.html)] sirve para calcular el producto punto entre vectores. 
 
 # In[ ]:
 
 
 def predict(x, w, b): 
     """
-    single predict using linear regression
+    predicción individual con regresión lineal
     Args:
-      x (ndarray): Shape (n,) example with multiple features
-      w (ndarray): Shape (n,) model parameters   
-      b (scalar):             model parameter 
+      x (ndarray): Forma (n,), ejemplo con múltiples variables
+      w (ndarray): Forma (n,), parámetros del modelo   
+      b (scalar):             parámetro del modelo 
       
     Returns:
-      p (scalar):  prediction
+      p (scalar):  predicción
     """
     p = np.dot(x, w) + b     
     return p    
@@ -224,73 +224,73 @@ def predict(x, w, b):
 # In[ ]:
 
 
-# get a row from our training data
+# tomar una fila de los datos de entrenamiento
 x_vec = X_train[0,:]
-print(f"x_vec shape {x_vec.shape}, x_vec value: {x_vec}")
+print(f"Forma de x_vec: {x_vec.shape}, valor de x_vec: {x_vec}")
 
-# make a prediction
+# hacer una predicción
 f_wb = predict(x_vec,w_init, b_init)
-print(f"f_wb shape {f_wb.shape}, prediction: {f_wb}")
+print(f"Forma de f_wb: {f_wb.shape}, predicción: {f_wb}")
 
 
-# The results and shapes are the same as the previous version which used looping. Going forward, `np.dot` will be used for these operations. The prediction is now a single statement. Most routines will implement it directly rather than calling a separate predict routine.
+# Los resultados y las formas son los mismos que en la versión anterior con ciclo. De aquí en adelante usaremos `np.dot` para estas operaciones. Ahora la predicción es una sola instrucción, así que la mayoría de las funciones la implementarán directamente en lugar de llamar a una función de predicción aparte.
 
 # <a name="toc_15456_4"></a>
-# # 4 Compute Cost With Multiple Variables
-# The equation for the cost function with multiple variables $J(\mathbf{w},b)$ is:
+# # 4 Cálculo del costo con múltiples variables
+# La ecuación de la función de costo con múltiples variables, $J(\mathbf{w},b)$, es:
 # $$J(\mathbf{w},b) = \frac{1}{2m} \sum\limits_{i = 0}^{m-1} (f_{\mathbf{w},b}(\mathbf{x}^{(i)}) - y^{(i)})^2 \tag{3}$$ 
-# where:
+# donde:
 # $$ f_{\mathbf{w},b}(\mathbf{x}^{(i)}) = \mathbf{w} \cdot \mathbf{x}^{(i)} + b  \tag{4} $$ 
 # 
 # 
-# In contrast to previous labs, $\mathbf{w}$ and $\mathbf{x}^{(i)}$ are vectors rather than scalars supporting multiple features.
+# A diferencia de los laboratorios anteriores, $\mathbf{w}$ y $\mathbf{x}^{(i)}$ son vectores y no escalares, para admitir múltiples variables.
 
-# Below is an implementation of equations (3) and (4). Note that this uses a *standard pattern for this course* where a for loop over all `m` examples is used.
+# Abajo hay una implementación de las ecuaciones (3) y (4). Observa que sigue un *patrón estándar de este curso*: un ciclo for que recorre los `m` ejemplos.
 
 # In[ ]:
 
 
 def compute_cost(X, y, w, b): 
     """
-    compute cost
+    calcula el costo
     Args:
-      X (ndarray (m,n)): Data, m examples with n features
-      y (ndarray (m,)) : target values
-      w (ndarray (n,)) : model parameters  
-      b (scalar)       : model parameter
+      X (ndarray (m,n)): Datos, m ejemplos con n variables
+      y (ndarray (m,)) : valores objetivo
+      w (ndarray (n,)) : parámetros del modelo  
+      b (scalar)       : parámetro del modelo
       
     Returns:
-      cost (scalar): cost
+      cost (scalar): costo
     """
     m = X.shape[0]
     cost = 0.0
     for i in range(m):                                
-        f_wb_i = np.dot(X[i], w) + b           #(n,)(n,) = scalar (see np.dot)
-        cost = cost + (f_wb_i - y[i])**2       #scalar
-    cost = cost / (2 * m)                      #scalar    
+        f_wb_i = np.dot(X[i], w) + b           #(n,)(n,) = escalar (ver np.dot)
+        cost = cost + (f_wb_i - y[i])**2       #escalar
+    cost = cost / (2 * m)                      #escalar    
     return cost
 
 
 # In[ ]:
 
 
-# Compute and display cost using our pre-chosen optimal parameters. 
+# Calcular y mostrar el costo usando los parámetros óptimos preseleccionados. 
 cost = compute_cost(X_train, y_train, w_init, b_init)
-print(f'Cost at optimal w : {cost}')
+print(f'Costo con w óptimo: {cost}')
 
 
-# **Expected Result**: Cost at optimal w : 1.5578904045996674e-12
+# **Resultado esperado**: Costo con w óptimo: 1.5578904045996674e-12
 
 # <a name="toc_15456_5"></a>
-# # 5 Gradient Descent With Multiple Variables
-# Gradient descent for multiple variables:
+# # 5 Descenso de gradiente con múltiples variables
+# Descenso de gradiente para múltiples variables:
 # 
-# $$\begin{align*} \text{repeat}&\text{ until convergence:} \; \lbrace \newline\;
-# & w_j = w_j -  \alpha \frac{\partial J(\mathbf{w},b)}{\partial w_j} \tag{5}  \; & \text{for j = 0..n-1}\newline
+# $$\begin{align*} \text{repetir}&\text{ hasta converger:} \; \lbrace \newline\;
+# & w_j = w_j -  \alpha \frac{\partial J(\mathbf{w},b)}{\partial w_j} \tag{5}  \; & \text{para j = 0..n-1}\newline
 # &b\ \ = b -  \alpha \frac{\partial J(\mathbf{w},b)}{\partial b}  \newline \rbrace
 # \end{align*}$$
 # 
-# where, n is the number of features, parameters $w_j$,  $b$, are updated simultaneously and where  
+# donde n es el número de variables, los parámetros $w_j$ y $b$ se actualizan simultáneamente, y donde  
 # 
 # $$
 # \begin{align}
@@ -298,19 +298,19 @@ print(f'Cost at optimal w : {cost}')
 # \frac{\partial J(\mathbf{w},b)}{\partial b}  &= \frac{1}{m} \sum\limits_{i = 0}^{m-1} (f_{\mathbf{w},b}(\mathbf{x}^{(i)}) - y^{(i)}) \tag{7}
 # \end{align}
 # $$
-# * m is the number of training examples in the data set
+# * m es el número de ejemplos de entrenamiento del conjunto de datos
 # 
 #     
-# *  $f_{\mathbf{w},b}(\mathbf{x}^{(i)})$ is the model's prediction, while $y^{(i)}$ is the target value
+# * $f_{\mathbf{w},b}(\mathbf{x}^{(i)})$ es la predicción del modelo, mientras que $y^{(i)}$ es el valor objetivo
 # 
 
 # <a name="toc_15456_5.1"></a>
-# ## 5.1 Compute Gradient with Multiple Variables
-# An implementation for calculating the equations (6) and (7) is below. There are many ways to implement this. In this version, there is an
-# - outer loop over all m examples. 
-#     - $\frac{\partial J(\mathbf{w},b)}{\partial b}$ for the example can be computed directly and accumulated
-#     - in a second loop over all n features:
-#         - $\frac{\partial J(\mathbf{w},b)}{\partial w_j}$ is computed for each $w_j$.
+# ## 5.1 Cálculo del gradiente con múltiples variables
+# Abajo hay una implementación para calcular las ecuaciones (6) y (7). Hay muchas formas de implementarlo. En esta versión hay
+# - un ciclo externo que recorre los m ejemplos. 
+#     - $\frac{\partial J(\mathbf{w},b)}{\partial b}$ para cada ejemplo se calcula directamente y se acumula
+#     - en un segundo ciclo que recorre las n variables:
+#         - se calcula $\frac{\partial J(\mathbf{w},b)}{\partial w_j}$ para cada $w_j$.
 #    
 
 # In[ ]:
@@ -318,18 +318,18 @@ print(f'Cost at optimal w : {cost}')
 
 def compute_gradient(X, y, w, b): 
     """
-    Computes the gradient for linear regression 
+    Calcula el gradiente para regresión lineal 
     Args:
-      X (ndarray (m,n)): Data, m examples with n features
-      y (ndarray (m,)) : target values
-      w (ndarray (n,)) : model parameters  
-      b (scalar)       : model parameter
+      X (ndarray (m,n)): Datos, m ejemplos con n variables
+      y (ndarray (m,)) : valores objetivo
+      w (ndarray (n,)) : parámetros del modelo  
+      b (scalar)       : parámetro del modelo
       
     Returns:
-      dj_dw (ndarray (n,)): The gradient of the cost w.r.t. the parameters w. 
-      dj_db (scalar):       The gradient of the cost w.r.t. the parameter b. 
+      dj_dw (ndarray (n,)): El gradiente del costo con respecto a los parámetros w. 
+      dj_db (scalar):       El gradiente del costo con respecto al parámetro b. 
     """
-    m,n = X.shape           #(number of examples, number of features)
+    m,n = X.shape           #(número de ejemplos, número de variables)
     dj_dw = np.zeros((n,))
     dj_db = 0.
 
@@ -347,114 +347,114 @@ def compute_gradient(X, y, w, b):
 # In[ ]:
 
 
-#Compute and display gradient 
+#Calcular y mostrar el gradiente 
 tmp_dj_db, tmp_dj_dw = compute_gradient(X_train, y_train, w_init, b_init)
-print(f'dj_db at initial w,b: {tmp_dj_db}')
-print(f'dj_dw at initial w,b: \n {tmp_dj_dw}')
+print(f'dj_db con w,b iniciales: {tmp_dj_db}')
+print(f'dj_dw con w,b iniciales: \n {tmp_dj_dw}')
 
 
-# **Expected Result**:   
-# dj_db at initial w,b: -1.6739251122999121e-06  
-# dj_dw at initial w,b:   
+# **Resultado esperado**:   
+# dj_db con w,b iniciales: -1.6739251122999121e-06  
+# dj_dw con w,b iniciales:   
 #  [-2.73e-03 -6.27e-06 -2.22e-06 -6.92e-05]  
 
 # <a name="toc_15456_5.2"></a>
-# ## 5.2 Gradient Descent With Multiple Variables
-# The routine below implements equation (5) above.
+# ## 5.2 Descenso de gradiente con múltiples variables
+# La siguiente función implementa la ecuación (5).
 
 # In[ ]:
 
 
 def gradient_descent(X, y, w_in, b_in, cost_function, gradient_function, alpha, num_iters): 
     """
-    Performs batch gradient descent to learn w and b. Updates w and b by taking 
-    num_iters gradient steps with learning rate alpha
+    Ejecuta descenso de gradiente por lotes (batch) para aprender w y b. Actualiza w y b dando 
+    num_iters pasos de gradiente con tasa de aprendizaje alpha
     
     Args:
-      X (ndarray (m,n))   : Data, m examples with n features
-      y (ndarray (m,))    : target values
-      w_in (ndarray (n,)) : initial model parameters  
-      b_in (scalar)       : initial model parameter
-      cost_function       : function to compute cost
-      gradient_function   : function to compute the gradient
-      alpha (float)       : Learning rate
-      num_iters (int)     : number of iterations to run gradient descent
+      X (ndarray (m,n))   : Datos, m ejemplos con n variables
+      y (ndarray (m,))    : valores objetivo
+      w_in (ndarray (n,)) : parámetros iniciales del modelo  
+      b_in (scalar)       : parámetro inicial del modelo
+      cost_function       : función para calcular el costo
+      gradient_function   : función para calcular el gradiente
+      alpha (float)       : Tasa de aprendizaje
+      num_iters (int)     : número de iteraciones del descenso de gradiente
       
     Returns:
-      w (ndarray (n,)) : Updated values of parameters 
-      b (scalar)       : Updated value of parameter 
+      w (ndarray (n,)) : Valores actualizados de los parámetros 
+      b (scalar)       : Valor actualizado del parámetro 
       """
     
-    # An array to store cost J and w's at each iteration primarily for graphing later
+    # Lista para guardar el costo J en cada iteración, principalmente para graficar después
     J_history = []
-    w = copy.deepcopy(w_in)  #avoid modifying global w within function
+    w = copy.deepcopy(w_in)  #evita modificar el w global dentro de la función
     b = b_in
     
     for i in range(num_iters):
 
-        # Calculate the gradient and update the parameters
+        # Calcular el gradiente
         dj_db,dj_dw = gradient_function(X, y, w, b)   ##None
 
-        # Update Parameters using w, b, alpha and gradient
+        # Actualizar los parámetros usando w, b, alpha y el gradiente
         w = w - alpha * dj_dw               ##None
         b = b - alpha * dj_db               ##None
       
-        # Save cost J at each iteration
-        if i<100000:      # prevent resource exhaustion 
+        # Guardar el costo J en cada iteración
+        if i<100000:      # evita agotar los recursos 
             J_history.append( cost_function(X, y, w, b))
 
-        # Print cost every at intervals 10 times or as many iterations if < 10
+        # Imprimir el costo 10 veces a lo largo del proceso (o en cada iteración si son menos de 10)
         if i% math.ceil(num_iters / 10) == 0:
-            print(f"Iteration {i:4d}: Cost {J_history[-1]:8.2f}   ")
+            print(f"Iteración {i:4d}: Costo {J_history[-1]:8.2f}   ")
         
-    return w, b, J_history #return final w,b and J history for graphing
+    return w, b, J_history #devuelve w, b finales y el historial de J para graficar
 
 
-# In the next cell you will test the implementation. 
+# En la siguiente celda vas a probar la implementación. 
 
 # In[ ]:
 
 
-# initialize parameters
+# inicializar los parámetros
 initial_w = np.zeros_like(w_init)
 initial_b = 0.
-# some gradient descent settings
+# configuración del descenso de gradiente
 iterations = 1000
 alpha = 5.0e-7
-# run gradient descent 
+# ejecutar el descenso de gradiente 
 w_final, b_final, J_hist = gradient_descent(X_train, y_train, initial_w, initial_b,
                                                     compute_cost, compute_gradient, 
                                                     alpha, iterations)
-print(f"b,w found by gradient descent: {b_final:0.2f},{w_final} ")
+print(f"b,w encontrados por descenso de gradiente: {b_final:0.2f},{w_final} ")
 m,_ = X_train.shape
 for i in range(m):
-    print(f"prediction: {np.dot(X_train[i], w_final) + b_final:0.2f}, target value: {y_train[i]}")
+    print(f"predicción: {np.dot(X_train[i], w_final) + b_final:0.2f}, valor objetivo: {y_train[i]}")
 
 
-# **Expected Result**:    
-# b,w found by gradient descent: -0.00,[ 0.2   0.   -0.01 -0.07]   
-# prediction: 426.19, target value: 460  
-# prediction: 286.17, target value: 232  
-# prediction: 171.47, target value: 178  
+# **Resultado esperado**:    
+# b,w encontrados por descenso de gradiente: -0.00,[ 0.2   0.   -0.01 -0.07]   
+# predicción: 426.19, valor objetivo: 460  
+# predicción: 286.17, valor objetivo: 232  
+# predicción: 171.47, valor objetivo: 178  
 
 # In[ ]:
 
 
-# plot cost versus iteration  
+# graficar el costo vs. la iteración  
 fig, (ax1, ax2) = plt.subplots(1, 2, constrained_layout=True, figsize=(12, 4))
 ax1.plot(J_hist)
 ax2.plot(100 + np.arange(len(J_hist[100:])), J_hist[100:])
-ax1.set_title("Cost vs. iteration");  ax2.set_title("Cost vs. iteration (tail)")
-ax1.set_ylabel('Cost')             ;  ax2.set_ylabel('Cost') 
-ax1.set_xlabel('iteration step')   ;  ax2.set_xlabel('iteration step') 
+ax1.set_title("Costo vs. iteración");  ax2.set_title("Costo vs. iteración (tramo final)")
+ax1.set_ylabel('Costo')             ;  ax2.set_ylabel('Costo') 
+ax1.set_xlabel('Iteración')   ;  ax2.set_xlabel('Iteración') 
 plt.show()
 
 
-# *These results are not inspiring*! Cost is still declining and our predictions are not very accurate. The next lab will explore how to improve on this.
+# *¡Estos resultados no son muy alentadores!* El costo sigue bajando y nuestras predicciones no son muy precisas. En el próximo laboratorio exploraremos cómo mejorar esto.
 
 # 
 # <a name="toc_15456_6"></a>
-# # 6 Congratulations!
-# In this lab you:
-# - Redeveloped the routines for linear regression, now with multiple variables.
-# - Utilized NumPy `np.dot` to vectorize the implementations
+# # 6 ¡Felicidades!
+# En este laboratorio:
+# - Volviste a desarrollar las funciones de regresión lineal, ahora con múltiples variables.
+# - Usaste `np.dot` de NumPy para vectorizar las implementaciones.
