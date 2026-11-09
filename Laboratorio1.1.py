@@ -1,37 +1,37 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# # Optional Lab: Model Representation
+
 # 
 # <figure>
 #  <img src="./images/C1_W1_L3_S1_Lecture_b.png"   style="width:600px;height:200px;">
 # </figure>
 
-# ## Goals
-# In this lab you will:
-# - Learn to implement the model $f_{w,b}$ for linear regression with one variable
+# ## Objetivos
+# En este laboratorio vas a:
+# - Aprender a implementar el modelo $f_{w,b}$ para regresión lineal con una variable
 
-# ## Notation
-# Here is a summary of some of the notation you will encounter.  
+# ## Notación
+# Aquí tienes un resumen de la notación que encontrarás en este ejercicio
 # 
-# |General <img width=70/> <br />  Notation  <img width=70/> | Description<img width=350/>| Python (if applicable) |
+# |General <img width=70/> <br />  Notación  <img width=70/> | Descripción<img width=350/>| Python (si aplica) |
 # |: ------------|: ------------------------------------------------------------||
-# | $a$ | scalar, non bold                                                      ||
-# | $\mathbf{a}$ | vector, bold                                                      ||
-# | **Regression** |         |    |     |
-# |  $\mathbf{x}$ | Training Example feature values (in this lab - Size (1000 sqft))  | `x_train` |   
-# |  $\mathbf{y}$  | Training Example  targets (in this lab Price (1000s of dollars))  | `y_train` 
-# |  $x^{(i)}$, $y^{(i)}$ | $i_{th}$Training Example | `x_i`, `y_i`|
-# | m | Number of training examples | `m`|
-# |  $w$  |  parameter: weight                                 | `w`    |
-# |  $b$           |  parameter: bias                                           | `b`    |     
-# | $f_{w,b}(x^{(i)})$ | The result of the model evaluation at $x^{(i)}$ parameterized by $w,b$: $f_{w,b}(x^{(i)}) = wx^{(i)}+b$  | `f_wb` | 
+# | $a$ | escalar, sin negrita                                                      ||
+# | $\mathbf{a}$ | vector, en negrita                                                      ||
+# | **Regresión** |         |    |     |
+# |  $\mathbf{x}$ | Valores de la variable en los datos de entrenamiento (en este lab: Tamaño (1000 pies²))  | `x_train` |   
+# |  $\mathbf{y}$  | Valores objetivo de los ejemplos de entrenamiento (en este lab: Precio (miles de dólares))  | `y_train` 
+# |  $x^{(i)}$, $y^{(i)}$ | $i$-ésimo ejemplo de entrenamiento | `x_i`, `y_i`|
+# | m | Número de ejemplos de entrenamiento | `m`|
+# |  $w$  |  parámetro: peso                                 | `w`    |
+# |  $b$           |  parámetro: sesgo                                           | `b`    |     
+# | $f_{w,b}(x^{(i)})$ | Resultado de evaluar el modelo en $x^{(i)}$, parametrizado por $w,b$: $f_{w,b}(x^{(i)}) = wx^{(i)}+b$  | `f_wb` | 
 # 
 
-# ## Tools
-# In this lab you will make use of: 
-# - NumPy, a popular library for scientific computing
-# - Matplotlib, a popular library for plotting data
+# ## Herramientas
+# En este laboratorio usarás: 
+# - NumPy, una librería de computación científica
+# - Matplotlib, una librería de visualización de datos
 
 # In[ ]:
 
@@ -41,125 +41,125 @@ import matplotlib.pyplot as plt
 #plt.style.use('./deeplearning.mplstyle')
 
 
-# # Problem Statement
+# # Planteamiento del problema
 # <img align="left" src="./images/C1_W1_L3_S1_trainingdata.png"    style=" width:380px; padding: 10px;  " /> 
 # 
-# As in the lecture, you will use the motivating example of housing price prediction.  
-# This lab will use a simple data set with only two data points - a house with 1000 square feet(sqft) sold for \\$300,000 and a house with 2000 square feet sold for \\$500,000. These two points will constitute our *data or training set*. In this lab, the units of size are 1000 sqft and the units of price are 1000s of dollars.
+# Como en la clase, usarás el ejemplo de predicción del precio de viviendas.  
+# Este laboratorio usa un conjunto de datos sencillo con solo dos puntos: una casa de 1000 pies cuadrados (pies²) vendida en \\$300,000 y una casa de 2000 pies cuadrados vendida en \\$500,000. Estos dos puntos constituyen nuestros *datos o conjunto de entrenamiento*. En este laboratorio, las unidades de tamaño son 1000 pies² y las unidades de precio son miles de dólares.
 # 
-# | Size (1000 sqft)     | Price (1000s of dollars) |
+# | Tamaño (1000 pies²)     | Precio (miles de dólares) |
 # | -------------------| ------------------------ |
 # | 1.0               | 300                      |
 # | 2.0               | 500                      |
 # 
-# You would like to fit a linear regression model (shown above as the blue straight line) through these two points, so you can then predict price for other houses - say, a house with 1200 sqft.
+# Quieres ajustar un modelo de regresión lineal (la línea recta azul de la figura) a través de estos dos puntos, para luego poder predecir el precio de otras casas; por ejemplo, una casa de 1200 pies².
 # 
 
-# Please run the following code cell to create your `x_train` and `y_train` variables. The data is stored in one-dimensional NumPy arrays.
+# Ejecuta la siguiente celda de código para crear tus variables `x_train` y `y_train`. Los datos se almacenan en arreglos (arrays) unidimensionales de NumPy.
 
 # In[ ]:
 
 
-# x_train is the input variable (size in 1000 square feet)
-# y_train is the target (price in 1000s of dollars)
+# x_train es la variable de entrada (tamaño en miles de pies cuadrados)
+# y_train es el objetivo (precio en miles de dólares)
 x_train = np.array([1.0, 2.0])
 y_train = np.array([300.0, 500.0])
 print(f"x_train = {x_train}")
 print(f"y_train = {y_train}")
 
 
-# >**Note**: The course will frequently utilize the python 'f-string' output formatting described [here](https://docs.python.org/3/tutorial/inputoutput.html) when printing. The content between the curly braces is evaluated when producing the output.
+# >**Nota**: El curso usará con frecuencia el formato de salida 'f-string' de Python, descrito [aquí](https://docs.python.org/3/tutorial/inputoutput.html), al imprimir resultados. El contenido entre llaves se evalúa al generar la salida.
 
-# ### Number of training examples `m`
-# You will use `m` to denote the number of training examples. Numpy arrays have a `.shape` parameter. `x_train.shape` returns a python tuple with an entry for each dimension. `x_train.shape[0]` is the length of the array and number of examples as shown below.
+# ### Número de ejemplos de entrenamiento `m`
+# Usarás `m` para denotar el número de ejemplos de entrenamiento. Los arrays de NumPy tienen un atributo `.shape`. `x_train.shape` devuelve una tupla de Python con una entrada por cada dimensión. `x_train.shape[0]` es la longitud del array, es decir, el número de ejemplos, como se muestra abajo.
 
 # In[ ]:
 
 
-# m is the number of training examples
+# m es el número de ejemplos de entrenamiento
 print(f"x_train.shape: {x_train.shape}")
 m = x_train.shape[0]
-print(f"Number of training examples is: {m}")
+print(f"El número de ejemplos de entrenamiento es: {m}")
 
 
-# One can also use the Python `len()` function as shown below.
+# También se puede usar la función `len()` de Python, como se muestra abajo.
 
 # In[ ]:
 
 
-# m is the number of training examples
+# m es el número de ejemplos de entrenamiento
 m = len(x_train)
-print(f"Number of training examples is: {m}")
+print(f"El número de ejemplos de entrenamiento es: {m}")
 
 
-# ### Training example `x_i, y_i`
+# ### Ejemplo de entrenamiento `x_i, y_i`
 # 
-# You will use (x$^{(i)}$, y$^{(i)}$) to denote the $i^{th}$ training example. Since Python is zero indexed, (x$^{(0)}$, y$^{(0)}$) is (1.0, 300.0) and (x$^{(1)}$, y$^{(1)}$) is (2.0, 500.0). 
+# Usarás (x$^{(i)}$, y$^{(i)}$) para denotar el $i$-ésimo ejemplo de entrenamiento. Como Python indexa desde cero, (x$^{(0)}$, y$^{(0)}$) es (1.0, 300.0) y (x$^{(1)}$, y$^{(1)}$) es (2.0, 500.0). 
 # 
-# To access a value in a Numpy array, one indexes the array with the desired offset. For example the syntax to access location zero of `x_train` is `x_train[0]`.
-# Run the next code block below to get the $i^{th}$ training example.
+# Para acceder a un valor de un array de NumPy, se indexa el array con la posición deseada. Por ejemplo, la sintaxis para acceder a la posición cero de `x_train` es `x_train[0]`.
+# Ejecuta el siguiente bloque de código para obtener el $i$-ésimo ejemplo de entrenamiento.
 
 # In[ ]:
 
 
-i = 0 # Change this to 1 to see (x^1, y^1)
+i = 0 # Cambia esto a 1 para ver (x^1, y^1)
 
 x_i = x_train[i]
 y_i = y_train[i]
 print(f"(x^({i}), y^({i})) = ({x_i}, {y_i})")
 
 
-# ### Plotting the data
+# ### Graficar los datos
 
-# You can plot these two points using the `scatter()` function in the `matplotlib` library, as shown in the cell below. 
-# - The function arguments `marker` and `c` show the points as red crosses (the default is blue dots).
+# Puedes graficar estos dos puntos con la función `scatter()` de la librería `matplotlib`, como se muestra en la celda de abajo. 
+# - Los argumentos `marker` y `c` muestran los puntos como cruces rojas (por defecto son puntos azules).
 # 
-# You can use other functions in the `matplotlib` library to set the title and labels to display
+# Puedes usar otras funciones de `matplotlib` para definir el título y las etiquetas que se mostrarán.
 
 # In[ ]:
 
 
-# Plot the data points
+# Graficar los puntos de datos
 plt.scatter(x_train, y_train, marker='x', c='r')
-# Set the title
-plt.title("Housing Prices")
-# Set the y-axis label
-plt.ylabel('Price (in 1000s of dollars)')
-# Set the x-axis label
-plt.xlabel('Size (1000 sqft)')
+# Definir el título
+plt.title("Precios de viviendas")
+# Definir la etiqueta del eje y
+plt.ylabel('Precio (miles de dólares)')
+# Definir la etiqueta del eje x
+plt.xlabel('Tamaño (1000 pies²)')
 plt.show()
 
 
-# ## Model function
+# ## Función del modelo
 # 
-# <img align="left" src="./images/C1_W1_L3_S1_model.png"     style=" width:380px; padding: 10px; " > As described in lecture, the model function for linear regression (which is a function that maps from `x` to `y`) is represented as 
+# <img align="left" src="./images/C1_W1_L3_S1_model.png"     style=" width:380px; padding: 10px; " > Como se explicó en clase, la función del modelo de regresión lineal (una función que mapea de `x` a `y`) se representa como 
 # 
 # $$ f_{w,b}(x^{(i)}) = wx^{(i)} + b \tag{1}$$
 # 
-# The formula above is how you can represent straight lines - different values of $w$ and $b$ give you different straight lines on the plot. <br/> <br/> <br/> <br/> <br/> 
+# La fórmula anterior es la forma de representar líneas rectas: distintos valores de $w$ y $b$ producen distintas líneas rectas en la gráfica. <br/> <br/> <br/> <br/> <br/> 
 # 
-# Let's try to get a better intuition for this through the code blocks below. Let's start with $w = 100$ and $b = 100$. 
+# Construyamos una mejor intuición con los bloques de código siguientes. Empecemos con $w = 100$ y $b = 100$. 
 # 
-# **Note: You can come back to this cell to adjust the model's w and b parameters**
+# **Nota: Puedes volver a esta celda para ajustar los parámetros w y b del modelo**
 
 # In[ ]:
 
 
-w = 200
+w = 100
 b = 100
 print(f"w: {w}")
 print(f"b: {b}")
 
 
-# Now, let's compute the value of $f_{w,b}(x^{(i)})$ for your two data points. You can explicitly write this out for each data point as - 
+# Ahora calculemos el valor de $f_{w,b}(x^{(i)})$ para tus dos puntos de datos. Puedes escribirlo explícitamente para cada punto así: 
 # 
-# for $x^{(0)}$, `f_wb = w * x[0] + b`
+# para $x^{(0)}$, `f_wb = w * x[0] + b`
 # 
-# for $x^{(1)}$, `f_wb = w * x[1] + b`
+# para $x^{(1)}$, `f_wb = w * x[1] + b`
 # 
-# For a large number of data points, this can get unwieldy and repetitive. So instead, you can calculate the function output in a `for` loop as shown in the `compute_model_output` function below.
-# > **Note**: The argument description `(ndarray (m,))` describes a Numpy n-dimensional array of shape (m,). `(scalar)` describes an argument without dimensions, just a magnitude.  
-# > **Note**: `np.zero(n)` will return a one-dimensional numpy array with $n$ entries   
+# Con muchos puntos de datos, esto se vuelve engorroso y repetitivo. Por eso, puedes calcular la salida de la función en un ciclo `for`, como en la función `compute_model_output` de abajo.
+# > **Nota**: La descripción del argumento `(ndarray (m,))` indica un array n-dimensional de NumPy con forma (m,). `(scalar)` indica un argumento sin dimensiones, solo una magnitud.  
+# > **Nota**: `np.zeros(n)` devuelve un array unidimensional de NumPy con $n$ entradas   
 # 
 
 # In[ ]:
@@ -167,12 +167,12 @@ print(f"b: {b}")
 
 def compute_model_output(x, w, b):
     """
-    Computes the prediction of a linear model
+    Calcula la predicción de un modelo lineal
     Args:
-      x (ndarray (m,)): Data, m examples 
-      w,b (scalar)    : model parameters  
+      x (ndarray (m,)): Datos, m ejemplos 
+      w,b (scalar)    : parámetros del modelo  
     Returns
-      f_wb (ndarray (m,)): model prediction
+      f_wb (ndarray (m,)): predicción del modelo
     """
     m = x.shape[0]
     f_wb = np.zeros(m)
@@ -182,49 +182,49 @@ def compute_model_output(x, w, b):
     return f_wb
 
 
-# Now let's call the `compute_model_output` function and plot the output..
+# Ahora llamemos a la función `compute_model_output` y grafiquemos el resultado.
 
 # In[ ]:
 
 
 tmp_f_wb = compute_model_output(x_train, w, b,)
 
-# Plot our model prediction
-plt.plot(x_train, tmp_f_wb, c='b',label='Our Prediction')
+# Graficar la predicción del modelo
+plt.plot(x_train, tmp_f_wb, c='b',label='Nuestra predicción')
 
-# Plot the data points
-plt.scatter(x_train, y_train, marker='x', c='r',label='Actual Values')
+# Graficar los puntos de datos
+plt.scatter(x_train, y_train, marker='x', c='r',label='Valores reales')
 
-# Set the title
-plt.title("Housing Prices")
-# Set the y-axis label
-plt.ylabel('Price (in 1000s of dollars)')
-# Set the x-axis label
-plt.xlabel('Size (1000 sqft)')
+# Definir el título
+plt.title("Precios de viviendas")
+# Definir la etiqueta del eje y
+plt.ylabel('Precio (miles de dólares)')
+# Definir la etiqueta del eje x
+plt.xlabel('Tamaño (1000 pies²)')
 plt.legend()
 plt.show()
 
 
-# As you can see, setting $w = 100$ and $b = 100$ does *not* result in a line that fits our data. 
+# Como puedes ver, usar $w = 100$ y $b = 100$ *no* produce una línea que se ajuste a nuestros datos. 
 # 
-# ### Challenge
-# Try experimenting with different values of $w$ and $b$. What should the values be for a line that fits our data?
+# ### Reto
+# Experimenta con distintos valores de $w$ y $b$. ¿Qué valores deberían tener para obtener una línea que se ajuste a los datos?
 # 
-# #### Tip:
-# You can use your mouse to click on the green "Hints" below to reveal some hints for choosing b and w.
+# #### Consejo:
+# Haz clic en "Pistas" (en verde) para ver algunas ideas para elegir b y w.
 
 # <details>
 # <summary>
-#     <font size='3', color='darkgreen'><b>Hints</b></font>
+#     <font size='3', color='darkgreen'><b>Pistas</b></font>
 # </summary>
 #     <p>
 #     <ul>
-#         <li>Try $w = 200$ and $b = 100$ </li>
+#         <li>Prueba con $w = 200$ y $b = 100$ </li>
 #     </ul>
 #     </p>
 
-# ### Prediction
-# Now that we have a model, we can use it to make our original prediction. Let's predict the price of a house with 1200 sqft. Since the units of $x$ are in 1000's of sqft, $x$ is 1.2.
+# ### Predicción
+# Ahora que tenemos un modelo, podemos usarlo para hacer la predicción que buscábamos. Vamos a predecir el precio de una casa de 1200 pies². Como las unidades de $x$ son miles de pies², $x$ es 1.2.
 # 
 
 # In[ ]:
@@ -235,18 +235,14 @@ b = 100
 x_i = 1.2
 cost_1200sqft = w * x_i + b    
 
-print(f"${cost_1200sqft:.0f} thousand dollars")
+print(f"${cost_1200sqft:.0f} mil dólares")
 
 
-# # Congratulations!
-# In this lab you have learned:
-#  - Linear regression builds a model which establishes a relationship between features and targets
-#      - In the example above, the feature was house size and the target was house price
-#      - for simple linear regression, the model has two parameters $w$ and $b$ whose values are 'fit' using *training data*.
-#      - once a model's parameters have been determined, the model can be used to make predictions on novel data.
+# # ¡Felicidades!
+# En este laboratorio aprendiste que:
+#  - La regresión lineal construye un modelo que establece una relación entre variables de entrada (features) y objetivos (targets)
+#      - En el ejemplo anterior, la variable de entrada era el tamaño de la casa y el objetivo era su precio
+#      - En la regresión lineal simple, el modelo tiene dos parámetros, $w$ y $b$, cuyos valores se "ajustan" usando *datos de entrenamiento*.
+#      - Una vez determinados los parámetros del modelo, este puede usarse para hacer predicciones sobre datos nuevos.
 
 # In[ ]:
-
-
-
-
