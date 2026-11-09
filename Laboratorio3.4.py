@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# # Optional Lab: Logistic Regression, Logistic Loss
+# # Laboratorio opcional: Regresión logística, pérdida logística
 # 
-# In this ungraded lab, you will:
-# - explore the reason the squared error loss is not appropriate for logistic regression
-# - explore the logistic loss function
+# En este laboratorio sin calificación vas a:
+# - Explorar por qué la pérdida de error cuadrático no es adecuada para la regresión logística
+# - Explorar la función de pérdida logística
 
 # In[ ]:
 
@@ -18,16 +18,16 @@ from plt_logistic_loss import soup_bowl, plt_logistic_squared_error
 plt.style.use('./deeplearning.mplstyle')
 
 
-# ## Squared error for logistic regression?
-# <img align="left" src="./images/C1_W3_SqErrorVsLogistic.png"     style=" width:400px; padding: 10px; " > Recall for **Linear** Regression we have used the **squared error cost function**:
-# The equation for the squared error cost with one variable is:
+# ## ¿Error cuadrático para la regresión logística?
+# <img align="left" src="./images/C1_W3_SqErrorVsLogistic.png"     style=" width:400px; padding: 10px; " > Recuerda que en regresión **lineal** usamos la **función de costo de error cuadrático**.
+# La ecuación del costo de error cuadrático con una variable es:
 #   $$J(w,b) = \frac{1}{2m} \sum\limits_{i = 0}^{m-1} (f_{w,b}(x^{(i)}) - y^{(i)})^2 \tag{1}$$ 
 #  
-# where 
+# donde 
 #   $$f_{w,b}(x^{(i)}) = wx^{(i)} + b \tag{2}$$
 # 
 
-# Recall, the squared error cost had the nice property that following the derivative of the cost leads to the minimum.
+# Recuerda que el costo de error cuadrático tenía una propiedad muy útil: seguir la derivada del costo lleva al mínimo.
 
 # In[ ]:
 
@@ -35,9 +35,9 @@ plt.style.use('./deeplearning.mplstyle')
 soup_bowl()
 
 
-# This cost function worked well for linear regression, it is natural to consider it for logistic regression as well. However, as the slide above points out, $f_{wb}(x)$ now has a non-linear component, the sigmoid function:   $f_{w,b}(x^{(i)}) = sigmoid(wx^{(i)} + b )$.   Let's try a squared error cost on the example from an earlier lab, now including the sigmoid.
+# Esta función de costo funcionó bien para la regresión lineal, así que es natural considerarla también para la regresión logística. Sin embargo, como señala la diapositiva de arriba, ahora $f_{wb}(x)$ tiene un componente no lineal, la función sigmoide: $f_{w,b}(x^{(i)}) = sigmoid(wx^{(i)} + b )$. Probemos el costo de error cuadrático con el ejemplo de un laboratorio anterior, ahora incluyendo la sigmoide.
 # 
-# Here is our training data:
+# Estos son nuestros datos de entrenamiento:
 
 # In[ ]:
 
@@ -47,10 +47,10 @@ y_train = np.array([0,  0, 0, 1, 1, 1],dtype=np.longdouble)
 plt_simple_example(x_train, y_train)
 
 
-# Now, let's get a surface plot of the cost using a *squared error cost*:
+# Ahora obtengamos una gráfica de superficie del costo usando el *costo de error cuadrático*:
 #   $$J(w,b) = \frac{1}{2m} \sum\limits_{i = 0}^{m-1} (f_{w,b}(x^{(i)}) - y^{(i)})^2 $$ 
 #  
-# where 
+# donde 
 #   $$f_{w,b}(x^{(i)}) = sigmoid(wx^{(i)} + b )$$
 # 
 
@@ -62,39 +62,39 @@ plt_logistic_squared_error(x_train,y_train)
 plt.show()
 
 
-# While this produces a pretty interesting plot, the surface above not nearly as smooth as the 'soup bowl' from linear regression!    
+# Aunque produce una gráfica bastante interesante, ¡la superficie no es ni de lejos tan suave como el "tazón de sopa" de la regresión lineal!    
 # 
-# Logistic regression requires a cost function more suitable to its non-linear nature. This starts with a Loss function. This is described below.
+# La regresión logística requiere una función de costo más adecuada a su naturaleza no lineal. Esto empieza con una función de pérdida, que se describe a continuación.
 
-# ## Logistic Loss Function
+# ## Función de pérdida logística
 # <img align="left" src="./images/C1_W3_LogisticLoss_a.png"     style=" width:250px; padding: 2px; " >
 # <img align="left" src="./images/C1_W3_LogisticLoss_b.png"     style=" width:250px; padding: 2px; " >
 # <img align="left" src="./images/C1_W3_LogisticLoss_c.png"     style=" width:250px; padding: 2px; " > 
 
-# Logistic Regression uses a loss function more suited to the task of categorization where the target is 0 or 1 rather than any number. 
+# La regresión logística usa una función de pérdida más adecuada para tareas de clasificación, donde el objetivo es 0 o 1 y no cualquier número. 
 # 
-# >**Definition Note:**   In this course, these definitions are used:  
-# **Loss** is a measure of the difference of a single example to its target value while the  
-# **Cost** is a measure of the losses over the training set
+# >**Nota sobre las definiciones:** En este curso se usan estas definiciones:  
+# La **pérdida** mide la diferencia entre la predicción para un solo ejemplo y su valor objetivo, mientras que el  
+# **costo** mide las pérdidas sobre todo el conjunto de entrenamiento.
 # 
 # 
-# This is defined: 
-# * $loss(f_{\mathbf{w},b}(\mathbf{x}^{(i)}), y^{(i)})$ is the cost for a single data point, which is:
+# Se define así: 
+# * $loss(f_{\mathbf{w},b}(\mathbf{x}^{(i)}), y^{(i)})$ es la pérdida para un solo punto de datos, que es:
 # 
 # \begin{equation}
 #   loss(f_{\mathbf{w},b}(\mathbf{x}^{(i)}), y^{(i)}) = \begin{cases}
-#     - \log\left(f_{\mathbf{w},b}\left( \mathbf{x}^{(i)} \right) \right) & \text{if $y^{(i)}=1$}\\
-#     - \log \left( 1 - f_{\mathbf{w},b}\left( \mathbf{x}^{(i)} \right) \right) & \text{if $y^{(i)}=0$}
+#     - \log\left(f_{\mathbf{w},b}\left( \mathbf{x}^{(i)} \right) \right) & \text{si $y^{(i)}=1$}\\
+#     - \log \left( 1 - f_{\mathbf{w},b}\left( \mathbf{x}^{(i)} \right) \right) & \text{si $y^{(i)}=0$}
 #   \end{cases}
 # \end{equation}
 # 
 # 
-# *  $f_{\mathbf{w},b}(\mathbf{x}^{(i)})$ is the model's prediction, while $y^{(i)}$ is the target value.
+# * $f_{\mathbf{w},b}(\mathbf{x}^{(i)})$ es la predicción del modelo, mientras que $y^{(i)}$ es el valor objetivo.
 # 
-# *  $f_{\mathbf{w},b}(\mathbf{x}^{(i)}) = g(\mathbf{w} \cdot\mathbf{x}^{(i)}+b)$ where function $g$ is the sigmoid function.
-# * Notational convention: `log` means the natural logarithm. 
+# * $f_{\mathbf{w},b}(\mathbf{x}^{(i)}) = g(\mathbf{w} \cdot\mathbf{x}^{(i)}+b)$, donde $g$ es la función sigmoide.
+# * Convención de notación: `log` significa logaritmo natural. 
 # 
-# The defining feature of this loss function is the fact that it uses two separate curves. One for the case when the target is zero or ($y=0$) and another for when the target is one ($y=1$). Combined, these curves provide the behavior useful for a loss function, namely, being zero when the prediction matches the target and rapidly increasing in value as the prediction differs from the target. Consider the curves below:
+# La característica distintiva de esta función de pérdida es que usa dos curvas separadas: una para cuando el objetivo es cero ($y=0$) y otra para cuando el objetivo es uno ($y=1$). Juntas, estas curvas dan el comportamiento que se espera de una función de pérdida: vale cero cuando la predicción coincide con el objetivo y aumenta rápidamente a medida que la predicción se aleja del objetivo. Observa las curvas de abajo:
 
 # In[ ]:
 
@@ -102,20 +102,20 @@ plt.show()
 plt_two_logistic_loss_curves()
 
 
-# Combined, the curves are similar to the quadratic curve of the squared error loss. Note, the x-axis is $f_{\mathbf{w},b}$ which is the output of a sigmoid. The sigmoid output is strictly between 0 and 1.
+# Juntas, las curvas se parecen a la curva cuadrática de la pérdida de error cuadrático. Observa que el eje x es $f_{\mathbf{w},b}$, la salida de una sigmoide, que siempre está estrictamente entre 0 y 1.
 
-# The loss function above can be rewritten to be easier to implement.
+# La función de pérdida anterior se puede reescribir para que sea más fácil de implementar.
 #     $$loss(f_{\mathbf{w},b}(\mathbf{x}^{(i)}), y^{(i)}) = (-y^{(i)} \log\left(f_{\mathbf{w},b}\left( \mathbf{x}^{(i)} \right) \right) - \left( 1 - y^{(i)}\right) \log \left( 1 - f_{\mathbf{w},b}\left( \mathbf{x}^{(i)} \right) \right)$$
 #   
-# This is a rather formidable-looking equation. It is less daunting when you consider $y^{(i)}$ can have only two values, 0 and 1. One can then consider the equation in two pieces:  
-# when $ y^{(i)} = 0$, the left-hand term is eliminated:
+# Es una ecuación de aspecto bastante intimidante. Se vuelve más sencilla si consideras que $y^{(i)}$ solo puede tomar dos valores, 0 y 1. Así, la ecuación se puede ver en dos partes:  
+# cuando $ y^{(i)} = 0$, se elimina el término de la izquierda:
 # $$
 # \begin{align}
 # loss(f_{\mathbf{w},b}(\mathbf{x}^{(i)}), 0) &= (-(0) \log\left(f_{\mathbf{w},b}\left( \mathbf{x}^{(i)} \right) \right) - \left( 1 - 0\right) \log \left( 1 - f_{\mathbf{w},b}\left( \mathbf{x}^{(i)} \right) \right) \\
 # &= -\log \left( 1 - f_{\mathbf{w},b}\left( \mathbf{x}^{(i)} \right) \right)
 # \end{align}
 # $$
-# and when $ y^{(i)} = 1$, the right-hand term is eliminated:
+# y cuando $ y^{(i)} = 1$, se elimina el término de la derecha:
 # $$
 # \begin{align}
 #   loss(f_{\mathbf{w},b}(\mathbf{x}^{(i)}), 1) &=  (-(1) \log\left(f_{\mathbf{w},b}\left( \mathbf{x}^{(i)} \right) \right) - \left( 1 - 1\right) \log \left( 1 - f_{\mathbf{w},b}\left( \mathbf{x}^{(i)} \right) \right)\\
@@ -123,7 +123,7 @@ plt_two_logistic_loss_curves()
 # \end{align}
 # $$
 # 
-# OK, with this new logistic loss function, a cost function can be produced that incorporates the loss from all the examples. This will be the topic of the next lab. For now, let's take a look at the cost vs parameters curve for the simple example we considered above:
+# Con esta nueva función de pérdida logística se puede construir una función de costo que incorpore la pérdida de todos los ejemplos. Ese será el tema del próximo laboratorio. Por ahora, veamos la curva del costo en función de los parámetros para el ejemplo sencillo que usamos arriba:
 
 # In[ ]:
 
@@ -132,11 +132,11 @@ plt.close('all')
 cst = plt_logistic_cost(x_train,y_train)
 
 
-# This curve is well suited to gradient descent! It does not have plateaus, local minima, or discontinuities. Note, it is not a bowl as in the case of squared error. Both the cost and the log of the cost are plotted to illuminate the fact that the curve, when the cost is small, has a slope and continues to decline. Reminder: you can rotate the above plots using your mouse.
+# ¡Esta curva es muy adecuada para el descenso de gradiente! No tiene mesetas, mínimos locales ni discontinuidades. Observa que no es un tazón como en el caso del error cuadrático. Se grafican tanto el costo como el logaritmo del costo para mostrar que, cuando el costo es pequeño, la curva sigue teniendo pendiente y sigue bajando. Recuerda: puedes rotar estas gráficas con el mouse.
 
-# ## Congratulations!  
-# You have:
-#  - determined a squared error loss function is not suitable for classification tasks
-#  - developed and examined the logistic loss function which **is** suitable for classification tasks.
+# ## ¡Felicidades!  
+# En este laboratorio:
+#  - Comprobaste que la función de pérdida de error cuadrático no es adecuada para tareas de clasificación.
+#  - Desarrollaste y examinaste la función de pérdida logística, que **sí** es adecuada para tareas de clasificación.
 # 
-# 
+#
