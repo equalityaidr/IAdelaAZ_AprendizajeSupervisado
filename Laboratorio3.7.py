@@ -1,18 +1,18 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# # Ungraded Lab:  Logistic Regression using Scikit-Learn
+# # Laboratorio sin calificación: Regresión logística con Scikit-Learn
 # 
 # 
 # 
 
-# ## Goals
-# In this lab you will:
-# -  Train a logistic regression model using scikit-learn.
+# ## Objetivos
+# En este laboratorio vas a:
+# - Entrenar un modelo de regresión logística con scikit-learn.
 # 
 
-# ## Dataset 
-# Let's start with the same dataset as before.
+# ## Conjunto de datos 
+# Empecemos con el mismo conjunto de datos de antes.
 
 # In[ ]:
 
@@ -23,9 +23,9 @@ X = np.array([[0.5, 1.5], [1,1], [1.5, 0.5], [3, 0.5], [2, 2], [1, 2.5]])
 y = np.array([0, 0, 0, 1, 1, 1])
 
 
-# ## Fit the model
+# ## Ajustar el modelo
 # 
-# The code below imports the [logistic regression model](https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LogisticRegression.html#sklearn.linear_model.LogisticRegression) from scikit-learn. You can fit this model on the training data by calling `fit` function.
+# El código de abajo importa el [modelo de regresión logística](https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LogisticRegression.html#sklearn.linear_model.LogisticRegression) de scikit-learn. Puedes ajustar este modelo a los datos de entrenamiento llamando a la función `fit`.
 
 # In[ ]:
 
@@ -36,24 +36,23 @@ lr_model = LogisticRegression()
 lr_model.fit(X, y)
 
 
-# ## Make Predictions
+# ## Hacer predicciones
 # 
-# You can see the predictions made by this model by calling the `predict` function.
+# Puedes ver las predicciones de este modelo llamando a la función `predict`.
 
 # In[ ]:
 
 
 y_pred = lr_model.predict(X)
 
-print("Prediction on training set:", y_pred)
+print("Predicción sobre el conjunto de entrenamiento:", y_pred)
 
 
-# ## Calculate accuracy
+# ## Calcular la exactitud
 # 
-# You can calculate this accuracy of this model by calling the `score` function.
+# Puedes calcular la exactitud (accuracy) de este modelo llamando a la función `score`.
 
 # In[ ]:
 
 
-print("Accuracy on training set:", lr_model.score(X, y))
-
+print("Exactitud sobre el conjunto de entrenamiento:", lr_model.score(X, y))
