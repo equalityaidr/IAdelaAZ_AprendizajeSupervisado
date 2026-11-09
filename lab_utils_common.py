@@ -1,10 +1,10 @@
 """
 lab_utils_common
-   contains common routines and variable definitions
-   used by all the labs in this week.
-   by contrast, specific, large plotting routines will be in separate files
-   and are generally imported into the week where they are used.
-   those files will import this file
+   contiene funciones y definiciones de variables comunes
+   que usan todos los laboratorios de esta semana.
+   en cambio, las funciones de graficación grandes y específicas están en archivos
+   separados y, por lo general, se importan en la semana en que se usan.
+   esos archivos importan este archivo
 """
 import copy
 import math
@@ -22,76 +22,76 @@ plt.style.use('./deeplearning.mplstyle')
 
 def sigmoid(z):
     """
-    Compute the sigmoid of z
+    Calcula la sigmoide de z
 
-    Parameters
+    Parámetros
     ----------
     z : array_like
-        A scalar or numpy array of any size.
+        Un escalar o un array de numpy de cualquier tamaño.
 
-    Returns
+    Devuelve
     -------
      g : array_like
          sigmoid(z)
     """
-    z = np.clip( z, -500, 500 )           # protect against overflow
+    z = np.clip( z, -500, 500 )           # protege contra desbordamiento (overflow)
     g = 1.0/(1.0+np.exp(-z))
 
     return g
 
 ##########################################################
-# Regression Routines
+# Funciones de regresión
 ##########################################################
 
 def predict_logistic(X, w, b):
-    """ performs prediction """
+    """ hace la predicción """
     return sigmoid(X @ w + b)
 
 def predict_linear(X, w, b):
-    """ performs prediction """
+    """ hace la predicción """
     return X @ w + b
 
 def compute_cost_logistic(X, y, w, b, lambda_=0, safe=False):
     """
-    Computes cost using logistic loss, non-matrix version
+    Calcula el costo usando la pérdida logística, versión sin matrices
 
     Args:
-      X (ndarray): Shape (m,n)  matrix of examples with n features
-      y (ndarray): Shape (m,)   target values
-      w (ndarray): Shape (n,)   parameters for prediction
-      b (scalar):               parameter  for prediction
-      lambda_ : (scalar, float) Controls amount of regularization, 0 = no regularization
-      safe : (boolean)          True-selects under/overflow safe algorithm
+      X (ndarray): Forma (m,n)  matriz de ejemplos con n variables
+      y (ndarray): Forma (m,)   valores objetivo
+      w (ndarray): Forma (n,)   parámetros para la predicción
+      b (scalar):               parámetro para la predicción
+      lambda_ : (scalar, float) Controla la cantidad de regularización, 0 = sin regularización
+      safe : (boolean)          True selecciona un algoritmo seguro contra underflow/overflow
     Returns:
-      cost (scalar): cost
+      cost (scalar): costo
     """
 
     m,n = X.shape
     cost = 0.0
     for i in range(m):
-        z_i    = np.dot(X[i],w) + b                                             #(n,)(n,) or (n,) ()
-        if safe:  #avoids overflows
+        z_i    = np.dot(X[i],w) + b                                             #(n,)(n,) o (n,) ()
+        if safe:  #evita desbordamientos
             cost += -(y[i] * z_i ) + log_1pexp(z_i)
         else:
             f_wb_i = sigmoid(z_i)                                                   #(n,)
-            cost  += -y[i] * np.log(f_wb_i) - (1 - y[i]) * np.log(1 - f_wb_i)       # scalar
+            cost  += -y[i] * np.log(f_wb_i) - (1 - y[i]) * np.log(1 - f_wb_i)       # escalar
     cost = cost/m
 
     reg_cost = 0
     if lambda_ != 0:
         for j in range(n):
-            reg_cost += (w[j]**2)                                               # scalar
+            reg_cost += (w[j]**2)                                               # escalar
         reg_cost = (lambda_/(2*m))*reg_cost
 
     return cost + reg_cost
 
 
 def log_1pexp(x, maximum=20):
-    ''' approximate log(1+exp^x)
+    ''' aproxima log(1+exp^x)
         https://stats.stackexchange.com/questions/475589/numerical-computation-of-cross-entropy-in-practice
     Args:
-    x   : (ndarray Shape (n,1) or (n,)  input
-    out : (ndarray Shape matches x      output ~= np.log(1+exp(x))
+    x   : (ndarray de forma (n,1) o (n,))   entrada
+    out : (ndarray con la misma forma que x) salida ~= np.log(1+exp(x))
     '''
 
     out  = np.zeros_like(x,dtype=float)
@@ -105,150 +105,153 @@ def log_1pexp(x, maximum=20):
 
 def compute_cost_matrix(X, y, w, b, logistic=False, lambda_=0, safe=True):
     """
-    Computes the cost using  using matrices
+    Calcula el costo usando matrices
     Args:
-      X : (ndarray, Shape (m,n))          matrix of examples
-      y : (ndarray  Shape (m,) or (m,1))  target value of each example
-      w : (ndarray  Shape (n,) or (n,1))  Values of parameter(s) of the model
-      b : (scalar )                       Values of parameter of the model
-      verbose : (Boolean) If true, print out intermediate value f_wb
+      X : (ndarray, forma (m,n))          matriz de ejemplos
+      y : (ndarray, forma (m,) o (m,1))   valor objetivo de cada ejemplo
+      w : (ndarray, forma (n,) o (n,1))   valores de los parámetros del modelo
+      b : (scalar )                       valor del parámetro del modelo
+      logistic: (boolean)                 lineal si es False, logística si es True
+      lambda_:  (float)                   aplica regularización si es distinto de cero
+      safe: (boolean)                     True usa el cálculo seguro contra desbordamiento (solo logística)
     Returns:
-      total_cost: (scalar)                cost
+      total_cost: (scalar)                costo
     """
     m = X.shape[0]
-    y = y.reshape(-1,1)             # ensure 2D
-    w = w.reshape(-1,1)             # ensure 2D
+    y = y.reshape(-1,1)             # asegura que sea 2D
+    w = w.reshape(-1,1)             # asegura que sea 2D
     if logistic:
-        if safe:  #safe from overflow
+        if safe:  #seguro contra desbordamiento
             z = X @ w + b                                                           #(m,n)(n,1)=(m,1)
             cost = -(y * z) + log_1pexp(z)
-            cost = np.sum(cost)/m                                                   # (scalar)
+            cost = np.sum(cost)/m                                                   # (escalar)
         else:
             f    = sigmoid(X @ w + b)                                               # (m,n)(n,1) = (m,1)
             cost = (1/m)*(np.dot(-y.T, np.log(f)) - np.dot((1-y).T, np.log(1-f)))   # (1,m)(m,1) = (1,1)
-            cost = cost[0,0]                                                        # scalar
+            cost = cost[0,0]                                                        # escalar
     else:
         f    = X @ w + b                                                        # (m,n)(n,1) = (m,1)
-        cost = (1/(2*m)) * np.sum((f - y)**2)                                   # scalar
+        cost = (1/(2*m)) * np.sum((f - y)**2)                                   # escalar
 
-    reg_cost = (lambda_/(2*m)) * np.sum(w**2)                                   # scalar
+    reg_cost = (lambda_/(2*m)) * np.sum(w**2)                                   # escalar
 
-    total_cost = cost + reg_cost                                                # scalar
+    total_cost = cost + reg_cost                                                # escalar
 
-    return total_cost                                                           # scalar
+    return total_cost                                                           # escalar
 
 def compute_gradient_matrix(X, y, w, b, logistic=False, lambda_=0):
     """
-    Computes the gradient using matrices
+    Calcula el gradiente usando matrices
 
     Args:
-      X : (ndarray, Shape (m,n))          matrix of examples
-      y : (ndarray  Shape (m,) or (m,1))  target value of each example
-      w : (ndarray  Shape (n,) or (n,1))  Values of parameters of the model
-      b : (scalar )                       Values of parameter of the model
-      logistic: (boolean)                 linear if false, logistic if true
-      lambda_:  (float)                   applies regularization if non-zero
+      X : (ndarray, forma (m,n))          matriz de ejemplos
+      y : (ndarray, forma (m,) o (m,1))   valor objetivo de cada ejemplo
+      w : (ndarray, forma (n,) o (n,1))   valores de los parámetros del modelo
+      b : (scalar )                       valor del parámetro del modelo
+      logistic: (boolean)                 lineal si es False, logística si es True
+      lambda_:  (float)                   aplica regularización si es distinto de cero
     Returns
-      dj_dw: (array_like Shape (n,1))     The gradient of the cost w.r.t. the parameters w
-      dj_db: (scalar)                     The gradient of the cost w.r.t. the parameter b
+      dj_dw: (array_like, forma (n,1))    El gradiente del costo con respecto a los parámetros w
+      dj_db: (scalar)                     El gradiente del costo con respecto al parámetro b
     """
     m = X.shape[0]
-    y = y.reshape(-1,1)             # ensure 2D
-    w = w.reshape(-1,1)             # ensure 2D
+    y = y.reshape(-1,1)             # asegura que sea 2D
+    w = w.reshape(-1,1)             # asegura que sea 2D
 
     f_wb  = sigmoid( X @ w + b ) if logistic else  X @ w + b      # (m,n)(n,1) = (m,1)
     err   = f_wb - y                                              # (m,1)
     dj_dw = (1/m) * (X.T @ err)                                   # (n,m)(m,1) = (n,1)
-    dj_db = (1/m) * np.sum(err)                                   # scalar
+    dj_db = (1/m) * np.sum(err)                                   # escalar
 
-    dj_dw += (lambda_/m) * w        # regularize                  # (n,1)
+    dj_dw += (lambda_/m) * w        # regularización              # (n,1)
 
-    return dj_db, dj_dw                                           # scalar, (n,1)
+    return dj_db, dj_dw                                           # escalar, (n,1)
 
 def gradient_descent(X, y, w_in, b_in, alpha, num_iters, logistic=False, lambda_=0, verbose=True):
     """
-    Performs batch gradient descent to learn theta. Updates theta by taking
-    num_iters gradient steps with learning rate alpha
+    Ejecuta descenso de gradiente por lotes (batch) para aprender los parámetros. Los actualiza
+    dando num_iters pasos de gradiente con tasa de aprendizaje alpha
 
     Args:
-      X (ndarray):    Shape (m,n)         matrix of examples
-      y (ndarray):    Shape (m,) or (m,1) target value of each example
-      w_in (ndarray): Shape (n,) or (n,1) Initial values of parameters of the model
-      b_in (scalar):                      Initial value of parameter of the model
-      logistic: (boolean)                 linear if false, logistic if true
-      lambda_:  (float)                   applies regularization if non-zero
-      alpha (float):                      Learning rate
-      num_iters (int):                    number of iterations to run gradient descent
+      X (ndarray):    Forma (m,n)         matriz de ejemplos
+      y (ndarray):    Forma (m,) o (m,1)  valor objetivo de cada ejemplo
+      w_in (ndarray): Forma (n,) o (n,1)  valores iniciales de los parámetros del modelo
+      b_in (scalar):                      valor inicial del parámetro del modelo
+      logistic: (boolean)                 lineal si es False, logística si es True
+      lambda_:  (float)                   aplica regularización si es distinto de cero
+      alpha (float):                      tasa de aprendizaje
+      num_iters (int):                    número de iteraciones del descenso de gradiente
+      verbose (boolean):                  si es True, imprime el costo durante el proceso
 
     Returns:
-      w (ndarray): Shape (n,) or (n,1)    Updated values of parameters; matches incoming shape
-      b (scalar):                         Updated value of parameter
+      w (ndarray): Forma (n,) o (n,1)     valores actualizados de los parámetros; misma forma que la entrada
+      b (scalar):                         valor actualizado del parámetro
     """
-    # An array to store cost J and w's at each iteration primarily for graphing later
+    # Lista para guardar el costo J en cada iteración, principalmente para graficar después
     J_history = []
-    w = copy.deepcopy(w_in)  #avoid modifying global w within function
+    w = copy.deepcopy(w_in)  #evita modificar el w global dentro de la función
     b = b_in
-    w = w.reshape(-1,1)      #prep for matrix operations
+    w = w.reshape(-1,1)      #prepara para operaciones con matrices
     y = y.reshape(-1,1)
 
     for i in range(num_iters):
 
-        # Calculate the gradient and update the parameters
+        # Calcular el gradiente
         dj_db,dj_dw = compute_gradient_matrix(X, y, w, b, logistic, lambda_)
 
-        # Update Parameters using w, b, alpha and gradient
+        # Actualizar los parámetros usando w, b, alpha y el gradiente
         w = w - alpha * dj_dw
         b = b - alpha * dj_db
 
-        # Save cost J at each iteration
-        if i<100000:      # prevent resource exhaustion
+        # Guardar el costo J en cada iteración
+        if i<100000:      # evita agotar los recursos
             J_history.append( compute_cost_matrix(X, y, w, b, logistic, lambda_) )
 
-        # Print cost every at intervals 10 times or as many iterations if < 10
+        # Imprimir el costo 10 veces a lo largo del proceso (o en cada iteración si son menos de 10)
         if i% math.ceil(num_iters / 10) == 0:
-            if verbose: print(f"Iteration {i:4d}: Cost {J_history[-1]}   ")
+            if verbose: print(f"Iteración {i:4d}: Costo {J_history[-1]}   ")
 
-    return w.reshape(w_in.shape), b, J_history  #return final w,b and J history for graphing
+    return w.reshape(w_in.shape), b, J_history  #devuelve w, b finales y el historial de J para graficar
 
 def zscore_normalize_features(X):
     """
-    computes  X, zcore normalized by column
+    calcula X normalizado por columna con z-score
 
     Args:
-      X (ndarray): Shape (m,n) input data, m examples, n features
+      X (ndarray): Forma (m,n) datos de entrada, m ejemplos, n variables
 
     Returns:
-      X_norm (ndarray): Shape (m,n)  input normalized by column
-      mu (ndarray):     Shape (n,)   mean of each feature
-      sigma (ndarray):  Shape (n,)   standard deviation of each feature
+      X_norm (ndarray): Forma (m,n)  entrada normalizada por columna
+      mu (ndarray):     Forma (n,)   media de cada variable
+      sigma (ndarray):  Forma (n,)   desviación estándar de cada variable
     """
-    # find the mean of each column/feature
-    mu     = np.mean(X, axis=0)                 # mu will have shape (n,)
-    # find the standard deviation of each column/feature
-    sigma  = np.std(X, axis=0)                  # sigma will have shape (n,)
-    # element-wise, subtract mu for that column from each example, divide by std for that column
+    # calcular la media de cada columna/variable
+    mu     = np.mean(X, axis=0)                 # mu tendrá forma (n,)
+    # calcular la desviación estándar de cada columna/variable
+    sigma  = np.std(X, axis=0)                  # sigma tendrá forma (n,)
+    # elemento a elemento: restar a cada ejemplo la media de su columna y dividir entre la desviación estándar de esa columna
     X_norm = (X - mu) / sigma
 
     return X_norm, mu, sigma
 
-#check our work
+#verificar nuestro trabajo
 #from sklearn.preprocessing import scale
 #scale(X_orig, axis=0, with_mean=True, with_std=True, copy=True)
 
 ######################################################
-# Common Plotting Routines
+# Funciones de graficación comunes
 ######################################################
 
 
 def plot_data(X, y, ax, pos_label="y=1", neg_label="y=0", s=80, loc='best' ):
-    """ plots logistic data with two axis """
-    # Find Indices of Positive and Negative Examples
+    """ grafica datos de clasificación logística con dos ejes """
+    # Encontrar los índices de los ejemplos positivos y negativos
     pos = y == 1
     neg = y == 0
-    pos = pos.reshape(-1,)  #work with 1D or 1D y vectors
+    pos = pos.reshape(-1,)  #funciona con vectores y de forma (m,) o (m,1)
     neg = neg.reshape(-1,)
 
-    # Plot examples
+    # Graficar los ejemplos
     ax.scatter(X[pos, 0], X[pos, 1], marker='x', s=s, c = 'red', label=pos_label)
     ax.scatter(X[neg, 0], X[neg, 1], marker='o', s=s, label=neg_label, facecolors='none', edgecolors=dlblue, lw=3)
     ax.legend(loc=loc)
@@ -258,24 +261,24 @@ def plot_data(X, y, ax, pos_label="y=1", neg_label="y=0", s=80, loc='best' ):
     ax.figure.canvas.footer_visible = False
 
 def plt_tumor_data(x, y, ax):
-    """ plots tumor data on one axis """
+    """ grafica los datos de tumores en un eje """
     pos = y == 1
     neg = y == 0
 
-    ax.scatter(x[pos], y[pos], marker='x', s=80, c = 'red', label="malignant")
-    ax.scatter(x[neg], y[neg], marker='o', s=100, label="benign", facecolors='none', edgecolors=dlblue,lw=3)
+    ax.scatter(x[pos], y[pos], marker='x', s=80, c = 'red', label="maligno")
+    ax.scatter(x[neg], y[neg], marker='o', s=100, label="benigno", facecolors='none', edgecolors=dlblue,lw=3)
     ax.set_ylim(-0.175,1.1)
     ax.set_ylabel('y')
-    ax.set_xlabel('Tumor Size')
-    ax.set_title("Logistic Regression on Categorical Data")
+    ax.set_xlabel('Tamaño del tumor')
+    ax.set_title("Regresión logística con datos categóricos")
 
     ax.figure.canvas.toolbar_visible = False
     ax.figure.canvas.header_visible = False
     ax.figure.canvas.footer_visible = False
 
-# Draws a threshold at 0.5
+# Dibuja un umbral en 0.5
 def draw_vthresh(ax,x):
-    """ draws a threshold """
+    """ dibuja un umbral """
     ylim = ax.get_ylim()
     xlim = ax.get_xlim()
     ax.fill_between([xlim[0], x], [ylim[1], ylim[1]], alpha=0.2, color=dlblue)
